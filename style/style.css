@@ -1,0 +1,345 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.center{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+image{
+    width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ddd;
+    color: #333;
+    width: 100vw;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+header {
+    position: absolute;
+    z-index: 1;
+    top: 60px;
+    left: 195px;
+}
+
+header h1 {
+    font-size: 21px;
+    margin: 0;
+}
+
+.nav {
+    background-color: rgba(0, 0, 0, 0);
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 150px;
+    text-align: center;
+    border-right: 1px solid #000;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.nav.scrolled,
+.nav:hover{
+    background-color: rgba(0, 0, 0, 1);
+}
+
+.nav li{
+    padding: 5px 0;
+}
+
+.nav li:first-of-type{
+    padding-top: 0;
+}
+
+.nav .logo {
+    display: block;
+    text-align: center;
+}
+
+.nav .logo img{
+    width: 100px;
+    margin: 30px auto;
+}
+
+.nav a {
+    color: #333;
+    margin: 0 15px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.nav.scrolled a,
+.nav:hover a{
+    color: #ccc;
+}
+
+.nav.scrolled a:hover,
+.nav:hover a:hover{
+    color: #fff;
+}
+
+.nav a.active{
+    color: red;
+}
+
+section {
+    background-color: #fff;
+    padding: 30px;
+}
+
+.fullscreen{
+    padding-left: 150px; /* Moet gelijk zijn aan de nav + 15 */
+    padding-right: 0;
+}
+
+.fullscreen .container {
+    width: 1280px;
+    transform: translateX(-75px); /* De helft */
+}
+
+.intro{
+    padding: 0;
+    margin: 0;
+}
+
+.intro .text{
+    z-index: 1;
+}
+
+.intro .carousel{
+    height: 100vh;
+}
+
+.about {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.about ul {
+    list-style: none;
+    padding: 0;
+}
+
+.about li {
+    margin: 5px 0;
+}
+
+.project{
+    
+}
+
+.v1{
+    height: 100vh;
+    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-size: cover; /* Makes sure the image covers the whole screen */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Ensures the image doesn't repeat */
+    border-bottom: 1px solid #000;
+}
+
+.v2{
+    height: 50vh;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+}
+
+.v2 .row,
+.v2 .col{
+    height: 100%;
+}
+
+.projectTwo,
+.projectThree{
+    padding-top: 30px !important;
+}
+
+.projectTwo{
+    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-size: cover; /* Makes sure the image covers the whole screen */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Ensures the image doesn't repeat */
+    border-right: 1px solid #000;
+}
+
+.projectThree{
+    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-size: cover; /* Makes sure the image covers the whole screen */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Ensures the image doesn't repeat */
+}
+
+.project .carousel,
+.project .arrow-container{
+    display: none;
+}
+
+.gallary {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.item{
+    position: relative;
+    cursor: pointer;
+}
+
+.item-content{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #000;
+    pointer-events: none;
+}
+
+.item:hover .item-content{
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+.item-content h3{
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.gallary .item-details{
+    display: none;
+}
+
+.gallary .btn{
+    display: none;
+    width: 100%;
+}
+
+.gallary .selected{
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition-property: opacity, visibility;
+    transition: 0.2s ease-in-out;
+}
+
+.gallary .selected.active {
+    z-index: 1;
+    opacity: 1;
+    visibility: visible;
+}
+
+.close-icon {
+    position: relative;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.close-icon::before,
+.close-icon::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 30px;
+    background-color: black;
+    top: 0;
+    left: 50%;
+    transform-origin: center;
+    transform: translateX(-50%);
+}
+
+.close-icon::before {
+    transform: translateX(-50%) rotate(45deg);  /* Diagonal line */
+}
+
+.close-icon::after {
+    transform: translateX(-50%) rotate(-45deg);  /* Diagonal line */
+}
+
+.selected .bg{
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.selected .content{
+    width: 70%;
+    position: fixed;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+}
+
+.contact{
+    margin-bottom: 30px;
+}
+
+.contact .input-field input:focus + label,
+.contact .input-field textarea:focus + label{
+    color: #000 !important;
+}
+
+.contact .input-field input:focus,
+.contact .input-field textarea:focus{
+    border-bottom: 1px solid #000 !important;
+    box-shadow: 0 1px 0 0 #000 !important;
+}
+
+.contact form .btn {
+    background-color: #000;
+}
+
+footer {
+    background-color: #000;
+    color: white;
+    padding: 20px;
+}
+
+footer .row{
+    padding: 30px 0;
+}
+
+footer .logo {
+    max-width: 100px;
+}
+
+footer ul li:first-of-type{
+    border-bottom: 1px solid #fff;
+    font-weight: 500;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+footer .copyright{
+    text-align: center;
+}

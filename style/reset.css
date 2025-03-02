@@ -1,0 +1,96 @@
+/* CSS Reset */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Remove list styling */
+ul, ol {
+    list-style: none;
+}
+
+/* Remove default link styles */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Remove default table styling */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Set images to be responsive */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Reset form elements */
+input,
+textarea,
+button,
+select {
+    background: none;
+    border: none;
+    outline: none;
+    font: inherit;
+}
+
+/* Normalize font sizes for headers */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+/* Set body font and background */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+}
+
+/* Make sure all sections have a consistent margin */
+section, article, aside, nav, footer, header {
+    margin: 0;
+    padding: 0;
+}
+
+
+
+/* Apply custom scrollbar to the body */
+body {
+    height: 100vh;
+    margin: 0;
+    overflow-y: scroll; /* Enable vertical scrolling */
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+/* Webkit-based browsers (Chrome, Safari, Edge) */
+body::-webkit-scrollbar {
+    width: 12px; /* Set width of the scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light gray track */
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: #888; /* Gray thumb */
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker thumb on hover */
+}
+
+/* Firefox */
+body {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1; /* Thumb and Track color */
+}

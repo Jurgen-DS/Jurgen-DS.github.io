@@ -1,0 +1,394 @@
+<!-- 
+
+project afronden
+gallery afronden
+responsive
+prev en next knoppen combineren / fixen -> eigen id of slimme oplossing
+
+
+ -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio Website">
+    <title>Portfolio</title>
+
+    <!-- <link rel="icon" href="/images/favicon.png" type="image/png" />
+    <link rel="shortcut icon" href="/favicon.ico" /> -->
+
+    <!-- Bootstrap CSS -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" /> -->
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style/reset.css">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/carousel.css">
+    <link rel="stylesheet" href="style/responsive.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <ul class="nav top">
+        <a href="#intro" class="logo"><img src="https://placehold.co/300x300/EEE/000" alt="logo"></a>
+        <li class="nav-item">
+            <a id="home" class="nav-link active" href="#intro">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#about">About</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#projects">Projects</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#gallery">Gallery</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#contact">Contact</a>
+        </li>
+    </ul>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Jurgen de Smit</h1> Designer & Art
+    </header>
+
+    <!-- Intro Section -->
+    <section id="intro" class="intro">
+        <div class="text center">
+            <h2>Welcome to My Portfolio</h2>
+            <p>I am a xxx. Check out my work!</p>
+        </div>
+
+        <!-- Gebruik de video OF de carousel. Je kunt eventueel ook videos in de carousel stoppen. -->
+        <video width="100%" height="100%" autoplay loop muted>
+            <source src="resources/videos/placeholder.mp4" type="video/mp4">
+            <!-- <source src="video.ogg" type="video/ogg"> -->
+            Your browser does not support the video tag.  
+        </video>
+
+        <!-- <div id="HomeCarousel" class="carousel carousel-slider" data-indicators="true">
+            <a class="carousel-item" href="#one!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+            <a class="carousel-item" href="#two!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+            <a class="carousel-item" href="#three!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+            <a class="carousel-item" href="#four!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+        </div> -->
+        
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about container">
+        <div class="row">
+            <div class="col s12 m6">
+                <h2>About</h2>
+                <p>
+                    Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia bibendum nulla sed consectetur. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu.
+                </p>
+                <!-- <ul>
+                    <li>Animation</li>
+                    <li>Sculpting</li>
+                    <li>Drawing</li>
+                </ul> -->
+            </div>
+            <div class="col s12 m6">
+                <img src="https://placehold.co/600x400/EEE/000" alt="Placeholder">
+            </div>
+        </div>
+    </section>
+
+    <div id="projects" class="projects">
+        <section class="project v1 fullscreen">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 projectOne">
+                        <h2>Project 1</h2>
+                        <p>   
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        </p>
+                        <div id="ProjectCarouselOne" class="carousel carousel-slider" data-indicators="true">
+                            <a class="carousel-item" href="#one!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                            <a class="carousel-item" href="#two!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                            <a class="carousel-item" href="#three!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                            <a class="carousel-item" href="#four!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        </div>
+                        <div class="arrow-container">
+                            <div id="prev" class="left-arrow"></div>
+                            <div id="next" class="right-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <img class="bg" src="https://placehold.co/2560x1440/EEE/000" alt="Background"> Met Jquery als css toevoegen? -->
+        </section>
+        
+        <section class="project v2 fullscreen">
+            <div class="row">
+                <div class="col s12 m6 projectTwo">
+                    <h2>Project 2</h2>
+                    <p>   
+                        Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcor
+                    </p>
+                    <div id="ProjectCarouselTwo" class="carousel carousel-slider" data-indicators="true">
+                        <a class="carousel-item" href="#one!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#two!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#three!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#four!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                    </div>
+                    <div class="arrow-container">
+                        <div id="prev" class="left-arrow"></div>
+                        <div id="next" class="right-arrow"></div>
+                    </div>
+                </div>
+                <div class="col s12 m6 projectThree">
+                    <h2>Project 3</h2>
+                    <p>   
+                        Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcor
+                    </p>
+                    <div id="ProjectCarouselThree" class="carousel carousel-slider" data-indicators="true">
+                        <a class="carousel-item" href="#one!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#two!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#three!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#four!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                    </div>
+                    <div class="arrow-container">
+                        <div id="prev" class="left-arrow"></div>
+                        <div id="next" class="right-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallary container">
+        <div class="row">
+            <h2>Gallery</h2>
+        </div>
+        <div class="row">
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                    <div class="item-details">
+                        <a class="carousel-item" href="#one!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#two!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#three!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#four!"><img src="https://placehold.co/2560x1440/EEE/000"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                    <div class="item-details">
+                        <a class="carousel-item" href="#one!"><img src="https://placehold.co/2561x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#two!"><img src="https://placehold.co/2561x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#three!"><img src="https://placehold.co/2561x1440/EEE/000"></a>
+                        <a class="carousel-item" href="#four!"><img src="https://placehold.co/2561x1440/EEE/000"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="item">
+                    <img src="https://placehold.co/600x600/EEE/000" alt="Item image">
+                    <div class="item-content">
+                        <h3 class="item-title">Item Title</h3>
+                        <p>A short description of what the item is about.</p>
+                    </div>
+                    <div class="item-action">
+                        <a href="#" class="btn">View Item</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row selected">
+            <span class="bg"></span>
+            <div class="content">
+                <div class="close-icon"></div>
+                <div id="GalleryCarousel" class="carousel carousel-slider" data-indicators="true">
+                    <a class="carousel-item" href="#placeholder!"><img src="https://placehold.co/10x10/EEE/000"></a>
+                </div>
+                <div class="arrow-container">
+                    <div id="prev" class="left-arrow"></div>
+                    <div id="next" class="right-arrow"></div>
+                </div>
+                <div class="item-content">
+                    <h3 class="item-title"></h3>
+                    <p></p>
+                </div>
+                <div class="item-action">
+                    <a href="#" class="btn">View Item</a>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact container">
+        <div class="row">
+            <div class="col s12 m6">
+                <h2>Contact Me</h2>
+                <p>over dat je contact op kan nemen</p>
+            </div>
+            <div class="col s12 m6">
+                <form id="form" action="#" method="POST">
+                    <div class="col s12 m6">
+                        <div class="input-field">
+                            <input type="text" name="name" id="name" class="validate" required>
+                            <label for="name">Your Name</label>
+                        </div>
+                    </div>
+                    <div class="col s12 m6">
+                        <div class="input-field">
+                            <input type="email" name="email" id="email" class="validate" required>
+                            <label for="email">Your Email</label>
+                        </div>
+                    </div>
+                    <div class="col l12">
+                        <div class="input-field">
+                            <textarea name="message" id="message" class="materialize-textarea validate" required></textarea>
+                            <label for="message">Your Message</label>
+                        </div>
+                    </div>
+                    <button disabled type="submit" class="btn waves-effect waves-light">Send Message</button> <!-- Tijdelijk disabled totdat er een account aan te linken is -->
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col s12 m6 l3">
+                    <a href="#intro"><img class="logo" src="https://placehold.co/300x300/EEE/000" alt="logo"></a>
+                </div>
+                <div class="col s12 m6 l3">
+                    
+                </div>
+                <div class="col s12 m6 l3">
+                    <ul>
+                        <li>info</li>
+                        <li>info</li>
+                        <li>info</li>
+                        <li>info</li>
+                        <li>info</li>
+                    </ul>
+                </div>
+                <div class="col s12 m6 l3">
+                    <ul>
+                        <li>refernces</li>
+                        <li>refernces</li>
+                        <li>refernces</li>
+                        <li>refernces</li>
+                        <li>refernces</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Jurgen de Smit. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Materialize JS (for functionality like buttons, modals, etc.) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="scripts/scripts.js"></script>
+    
+</body>
+
+</html>

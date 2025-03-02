@@ -1,0 +1,56 @@
+
+.project .info{
+    position: relative;
+    z-index: 1;
+    padding: 30px;
+}
+
+.project .info h2{
+    margin-top: 0;
+}
+
+.project .bg{
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.project{
+    position: relative;
+}
+
+.project.v1 .row{
+    margin: 0;
+}
+
+.project.v1 .info{
+    color: #000;
+    background-color: rgba(0, 0, 0, 0.2);
+    min-height: 450px;
+}
+
+.project.v1:hover .info{
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.project-content{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #000;
+}
+
+.project:hover .project-content{
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+.project-content h3{
+    font-size: 24px;
+    margin-bottom: 15px;
+}
