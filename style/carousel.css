@@ -1,51 +1,58 @@
 .arrow-container {
-    display: flex;
-    justify-content: space-between;
-    width: 200px;
-    margin: 50px auto;
-  }
-  
-  .left-arrow, .right-arrow {
-    position: relative;
-    width: 30px;
-    height: 20px;
-    cursor: pointer;
-  }
-  
-  .left-arrow::before, .left-arrow::after,
-  .right-arrow::before, .right-arrow::after {
-    content: '';
     position: absolute;
-    width: 20px;
-    height: 2px;
-    background-color: #333;
+    top: 50%;
+    width: 100%;
   }
   
-  .left-arrow::before {
-    transform: rotate(-45deg);
-    top: 0;
-    left: 0;
-  }
-  
-  .left-arrow::after {
-    transform: rotate(45deg);
-    bottom: 0;
-    left: 0;
-  }
-  
-  .right-arrow::before {
-    transform: rotate(45deg);
-    top: 0;
-    right: 0;
-  }
-  
-  .right-arrow::after {
-    transform: rotate(-45deg);
-    bottom: 0;
-    right: 0;
-  }
+.left-arrow, .right-arrow {
+  position: absolute;
+  width: 30px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.left-arrow{
+  left: 30px;
+}
+
+.right-arrow{
+  right: 30px;
+}
+
+.left-arrow::before, .left-arrow::after,
+.right-arrow::before, .right-arrow::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background-color: #333;
+}
+
+.left-arrow::before {
+  transform: rotate(-45deg);
+  top: 0;
+  left: 0;
+}
+
+.left-arrow::after {
+  transform: rotate(45deg);
+  bottom: 0;
+  left: 0;
+}
+
+.right-arrow::before {
+  transform: rotate(45deg);
+  top: 0;
+  right: 0;
+}
+
+.right-arrow::after {
+  transform: rotate(-45deg);
+  bottom: 0;
+  right: 0;
+}
   
 .left-arrow:hover::before, .left-arrow:hover::after,
 .right-arrow:hover::before, .right-arrow:hover::after {
-  background-color: #007BFF; /* Change color on hover */
+  background-color: #000;
 }

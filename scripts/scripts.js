@@ -10,6 +10,20 @@ $(document).ready(function () {
         $(this).addClass('active');
     });
 
+    // Trigger nav burger animation
+    $(".main-nav-toggle").click(function (event) {
+        event.stopPropagation();
+        $(this).toggleClass('active-menu');
+        $(".nav").toggleClass('active-menu');
+    });
+
+    $(document).click(function () {
+        if ($(".main-nav-toggle").hasClass('active-menu')) {
+            $(".main-nav-toggle").removeClass('active-menu');
+            $(".nav").removeClass('active-menu');
+        }
+    });
+
     // Scroll event to remove active class from all links
     $(window).bind('mousewheel', function(event){
         if ($(this).scrollTop() > 0) {
