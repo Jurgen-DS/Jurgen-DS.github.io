@@ -232,10 +232,6 @@ section {
 
 .v1{
     height: 100vh;
-    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     border-bottom: 1px solid #000;
 }
 
@@ -249,16 +245,25 @@ section {
     height: 100%;
 }
 
-.projectTwo{
-    padding-left: 165px !important; /* nav breedte + 15 */
+.v3{
+    height: 500px;
+    border-bottom: 1px solid #000;
+}
+
+.projectOne{
+    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .projectTwo,
 .projectThree{
-    padding-top: 30px !important;
+    padding: 30px !important;
 }
 
 .projectTwo{
+    padding-left: 180px !important; /* nav breedte + 30 */
     background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
     background-size: cover;
     background-position: center;
@@ -267,6 +272,13 @@ section {
 }
 
 .projectThree{
+    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.projectFour{
     background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
     background-size: cover;
     background-position: center;

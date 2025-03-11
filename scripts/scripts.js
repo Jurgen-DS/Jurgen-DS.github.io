@@ -49,10 +49,10 @@ $(document).ready(function () {
         interval: 6000      // Time between transitions in milliseconds
     });
 
-    // Manually start autoplay after initialization (optional: Dit zou eingelijk niet nodig moeten zijn, maar krijg het anders niet aan de praat)
-    setInterval(function() {
-        homeinstance[0].next(); // Manually move to the next slide every 2 seconds
-    }, 6000);
+    // // Manually start autoplay after initialization (optional: Dit zou eingelijk niet nodig moeten zijn, maar krijg het anders niet aan de praat)
+    // setInterval(function() {
+    //     homeinstance[0].next(); // Manually move to the next slide every 2 seconds
+    // }, 6000);
 
     var projectOne = document.querySelectorAll('#ProjectCarouselOne');
     var projectOneinstance = M.Carousel.init(projectOne, {
