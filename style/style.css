@@ -226,10 +226,6 @@ section {
     margin: 5px 0;
 }
 
-.project{
-    
-}
-
 .v1{
     height: 100vh;
     border-bottom: 1px solid #000;
@@ -451,3 +447,5 @@ footer ul li:first-of-type{
 footer .copyright{
     text-align: center;
 }
+
+
