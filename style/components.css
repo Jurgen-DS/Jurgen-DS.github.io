@@ -1,4 +1,4 @@
-
+/* Binnen een container */
 .project .info{
     position: relative;
     z-index: 1;
@@ -53,4 +53,34 @@
 .project-content h3{
     font-size: 24px;
     margin-bottom: 15px;
+}
+
+/* fullscreen */
+.v1{
+    height: 100vh;
+    border-bottom: 1px solid #000;
+}
+
+.v2{
+    height: 50vh;
+    padding: 0;
+}
+
+.v2 .row,
+.v2 .col{
+    height: 100%;
+}
+
+.projectTwo,
+.projectThree{
+    padding: 30px !important;
+}
+
+.projectTwo{
+    padding-left: 180px !important; /* nav breedte + 30 */
+    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-right: 1px solid #000;
 }

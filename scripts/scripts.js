@@ -136,8 +136,36 @@ $(document).ready(function () {
         $('.selected').find('h3').text(title);
         $('.selected').find('p').text(description);
 
+        // Clear the current image or video
+        $('#Alt').empty();
+    
+        // Check if there's a video
+        var video = $(this).find('.item-details video');
+        if (video.length > 0) {
+            $('#Alt').show();
+            $('#Alt').append(video.clone());
+            $('#GalleryCarousel').hide();
+            $('.selected .arrow-container').hide();
+            return;
+        }
+    
+        // Check if there's only a single image
+        var singleImg = $(this).find('.item-details img');
+        if (singleImg.length === 1) {
+            $('#Alt').show();
+            $('#Alt').append(singleImg.clone());
+            $('#GalleryCarousel').hide();
+            $('.selected .arrow-container').hide();
+            return;
+        }
+
+        // Else prepare the carousel
+        $('#Alt').hide();
+        $('#GalleryCarousel').show();
+        $('.selected .arrow-container').show();
+
         // Get the carousel instance
-        var galleryinstance = M.Carousel.getInstance(document.querySelector('#GalleryCarousel'));
+        galleryinstance = M.Carousel.getInstance(document.querySelector('#GalleryCarousel'));
         galleryinstance.destroy();
         $('#GalleryCarousel').empty();
 
@@ -156,12 +184,12 @@ $(document).ready(function () {
         var galleryinstance = M.Carousel.getInstance(document.querySelector('#GalleryCarousel'));
 
         // Previous button action
-        document.getElementById('prev').addEventListener('click', function() {
+        document.getElementById('selectedPrev').addEventListener('click', function() {
             galleryinstance.prev(); // Go to the previous item
         });
 
         // Next button action
-        document.getElementById('next').addEventListener('click', function() {
+        document.getElementById('selectedNext').addEventListener('click', function() {
             galleryinstance.next(); // Go to the next item
         });
     });

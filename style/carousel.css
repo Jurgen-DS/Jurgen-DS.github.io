@@ -6,8 +6,8 @@
   
 .left-arrow, .right-arrow {
   position: absolute;
-  width: 30px;
-  height: 15px;
+  width: 60px;
+  height: 60px;
   cursor: pointer;
 }
 
@@ -25,34 +25,34 @@
   position: absolute;
   width: 20px;
   height: 2px;
-  background-color: #333;
+  background-color: #ccc;
 }
 
 .left-arrow::before {
   transform: rotate(-45deg);
-  top: 0;
-  left: 0;
+  top: 22px;
+  left: 15px;
 }
 
 .left-arrow::after {
   transform: rotate(45deg);
-  bottom: 0;
-  left: 0;
+  bottom: 22px;
+  left: 15px;
 }
 
 .right-arrow::before {
   transform: rotate(45deg);
-  top: 0;
-  right: 0;
+  top: 22px;
+  right: 15px;
 }
 
 .right-arrow::after {
   transform: rotate(-45deg);
-  bottom: 0;
-  right: 0;
+  bottom: 22px;
+  right: 15px;
 }
   
 .left-arrow:hover::before, .left-arrow:hover::after,
 .right-arrow:hover::before, .right-arrow:hover::after {
-  background-color: #000;
+  background-color: #fff;
 }

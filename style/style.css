@@ -15,7 +15,8 @@ html {
     transform: translate(-50%, -50%);
 }
 
-image{
+image,
+video{
     width: 100%;
 }
 
@@ -226,23 +227,9 @@ section {
     margin: 5px 0;
 }
 
-.v1{
-    height: 100vh;
-    border-bottom: 1px solid #000;
-}
-
-.v2{
-    height: 50vh;
-    padding: 0;
-}
-
-.v2 .row,
-.v2 .col{
-    height: 100%;
-}
-
 .v3{
-    height: 500px;
+    height: 50vh;
+    min-height: 300px;
     border-bottom: 1px solid #000;
 }
 
@@ -253,13 +240,7 @@ section {
     background-repeat: no-repeat;
 }
 
-.projectTwo,
-.projectThree{
-    padding: 30px !important;
-}
-
 .projectTwo{
-    padding-left: 180px !important; /* nav breedte + 30 */
     background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
     background-size: cover;
     background-position: center;
@@ -297,8 +278,10 @@ section {
 
 .item{
     position: relative;
+    aspect-ratio : 1 / 1;
     cursor: pointer;
     margin-bottom: 20px;
+    overflow: hidden;
 }
 
 .item-content{
@@ -308,14 +291,22 @@ section {
     height: 100%;
     width: 100%;
     padding: 15px;
-    background-color: rgba(0, 0, 0, 0.2);
-    color: #000;
+    background-color: rgba(0, 0, 0, 0);
+    color: transparent;
     pointer-events: none;
+    transition: 0.2s ease-in-out;
+    transition-property: "color background-color";
 }
 
 .item:hover .item-content{
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.6);
     color: #fff;
+}
+
+.item img{
+    flex-shrink:0;
+    min-width:100%;
+    min-height:100%
 }
 
 .item-content h3{
@@ -369,7 +360,7 @@ section {
     position: absolute;
     width: 2px;
     height: 30px;
-    background-color: black;
+    background-color: #ccc;
     top: 0;
     left: 50%;
     transform-origin: center;
@@ -382,6 +373,11 @@ section {
 
 .close-icon::after {
     transform: translateX(-50%) rotate(-45deg);
+}
+
+.close-icon:hover::before,
+.close-icon:hover::after {
+    background-color: #fff;
 }
 
 .selected .bg{
@@ -402,6 +398,15 @@ section {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #fff;
+}
+
+.selected .carousel{
+    max-height: 70vh !important;
+}
+
+.selected img,
+.selected video{
+    margin-bottom: -6px;
 }
 
 .contact{
