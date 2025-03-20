@@ -153,8 +153,10 @@ header h1 {
 }
 
 .nav .logo img{
-    width: 100px;
-    margin: 30px auto;
+    width: 120px;
+    height: 120px; 
+    margin-top: 18px;
+    margin-bottom: 50px;
 }
 
 .nav a {
@@ -236,7 +238,7 @@ section {
 }
 
 .projectOne{
-    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-image: url('../resources/images/banners/fictieve-artiest.png'); /* URL of the image */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
