@@ -63,17 +63,17 @@ $(document).ready(function () {
     });
 
     // Get the carousel instance
-    // var carouselInstanceOne = M.Carousel.getInstance(document.querySelector('#ProjectCarouselOne'));
+    var carouselInstanceOne = M.Carousel.getInstance(document.querySelector('#ProjectCarouselOne'));
 
     // // Previous button action
-    // document.getElementById('prev').addEventListener('click', function() {
-    //     carouselInstanceOne.prev(); // Go to the previous item
-    // });
+    document.getElementById('onePrev').addEventListener('click', function() {
+        carouselInstanceOne.prev();
+    });
 
     // // Next button action
-    // document.getElementById('next').addEventListener('click', function() {
-    //     carouselInstanceOne.next(); // Go to the next item
-    // });
+    document.getElementById('oneNext').addEventListener('click', function() {
+        carouselInstanceOne.next();
+    });
 
     var projectTwo = document.querySelectorAll('#ProjectCarouselTwo');
     var projectinstance = M.Carousel.init(projectTwo, {
@@ -84,17 +84,17 @@ $(document).ready(function () {
     });
 
     // // Get the carousel instance
-    // var carouselInstanceTwo = M.Carousel.getInstance(document.querySelector('#ProjectCarouselTwo'));
+    var carouselInstanceTwo = M.Carousel.getInstance(document.querySelector('#ProjectCarouselTwo'));
 
     // // Previous button action
-    // document.getElementById('prev').addEventListener('click', function() {
-    //     carouselInstanceTwo.prev(); // Go to the previous item
-    // });
+    document.getElementById('twoPrev').addEventListener('click', function() {
+        carouselInstanceTwo.prev();
+    });
 
     // // Next button action
-    // document.getElementById('next').addEventListener('click', function() {
-    //     carouselInstanceTwo.next(); // Go to the next item
-    // });
+    document.getElementById('twoNext').addEventListener('click', function() {
+        carouselInstanceTwo.next();
+    });
 
     var projectThree = document.querySelectorAll('#ProjectCarouselThree');
     var projectinstance = M.Carousel.init(projectThree, {
@@ -105,23 +105,53 @@ $(document).ready(function () {
     });
 
     // // Get the carousel instance
-    // var carouselInstanceTwo = M.Carousel.getInstance(document.querySelector('#ProjectCarouselTwo'));
+    var carouselInstanceThree = M.Carousel.getInstance(document.querySelector('#ProjectCarouselThree'));
 
     // // Previous button action
-    // document.getElementById('prev').addEventListener('click', function() {
-    //     carouselInstanceTwo.prev(); // Go to the previous item
-    // });
+    document.getElementById('threePrev').addEventListener('click', function() {
+        carouselInstanceThree.prev();
+    });
 
     // // Next button action
-    // document.getElementById('next').addEventListener('click', function() {
-    //     carouselInstanceTwo.next(); // Go to the next item
-    // });
+    document.getElementById('threeNext').addEventListener('click', function() {
+        carouselInstanceThree.next(); 
+    });
 
+    var projectFour = document.querySelectorAll('#ProjectCarouselFour');
+    var projectinstance = M.Carousel.init(projectFour, {
+        fullWidth: true,    // Makes the carousel span the entire width
+        indicators: true,   // Show navigation indicators
+        autoplay: true,     // Enables automatic transition
+        interval: 2000      // Time between transitions in milliseconds
+    });
+
+    // // Get the carousel instance
+    var carouselInstanceFour = M.Carousel.getInstance(document.querySelector('#ProjectCarouselFour'));
+
+    // // Previous button action
+    document.getElementById('fourPrev').addEventListener('click', function() {
+        carouselInstanceFour.prev();
+    });
+
+    // // Next button action
+    document.getElementById('fourNext').addEventListener('click', function() {
+        carouselInstanceFour.next();
+    });
 
     var gallery = document.querySelectorAll('#GalleryCarousel');
     var galleryinstance = M.Carousel.init(gallery, {
         fullWidth: true,
         indicators: true
+    });
+
+    $('.project .text .btn').click(function() {
+        $('.details').removeClass("active");
+        $(this).closest(".project").find(".details").addClass("active");
+    });
+
+    // Close / hide gallery details
+    $('.details .close-icon, .details .bg').on('click', function() {
+        $('.details').removeClass('active');
     });
 
     $('.item').click(function() {
@@ -185,17 +215,17 @@ $(document).ready(function () {
 
         // Previous button action
         document.getElementById('selectedPrev').addEventListener('click', function() {
-            galleryinstance.prev(); // Go to the previous item
+            galleryinstance.prev();
         });
 
         // Next button action
         document.getElementById('selectedNext').addEventListener('click', function() {
-            galleryinstance.next(); // Go to the next item
+            galleryinstance.next();
         });
     });
 
     // Close / hide gallery details
-    $('.close-icon, .selected .bg').on('click', function() {
+    $('.selected .close-icon, .selected .bg').on('click', function() {
         $('.selected').removeClass('active');
     });
 

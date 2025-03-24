@@ -266,9 +266,62 @@ section {
     background-repeat: no-repeat;
 }
 
-.project .carousel,
-.project .arrow-container{
-    display: none;
+.project .container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.project .text{
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+}
+
+.project .btn{
+    margin-top: 30px;
+    background-color: #000;
+}
+
+.project .details{
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition-property: opacity, visibility;
+    transition: 0.2s ease-in-out;
+}
+
+.project .details.active {
+    z-index: 2;
+    opacity: 1;
+    visibility: visible;
+}
+
+.project .details .bg{
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.project .details .content{
+    width: 70%;
+    position: fixed;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+}
+
+.project .details .carousel{
+    max-height: 70vh !important;
 }
 
 .gallary {
