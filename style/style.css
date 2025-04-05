@@ -195,10 +195,6 @@ section {
     z-index: 1;
 }
 
-.intro .carousel{
-    height: 100%;
-}
-
 .intro video{
     position: absolute;
     top: 0;
@@ -318,10 +314,6 @@ section {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #fff;
-}
-
-.project .details .carousel{
-    max-height: 70vh !important;
 }
 
 .gallary {
@@ -455,10 +447,6 @@ section {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #fff;
-}
-
-.selected .carousel{
-    max-height: 70vh !important;
 }
 
 .selected img,

@@ -1,7 +1,6 @@
 
 /* Breakpoint for small screens (600px to 767px) */
 @media only screen and (max-width: 600px) {
-    /* Custom styles for small screens */
 }
 
 /* Breakpoint for medium screens (768px to 991px) */
@@ -58,10 +57,8 @@
 
 /* Breakpoint for extra large screens (1200px and up) */
 @media only screen and (max-width: 1200px) {
-    /* Custom styles for extra large screens */
 }
 
 /* Breakpoint for desktop (1200px and up) */
 @media only screen and (min-width: 1200px) {
-    /* Custom styles for extra large screens */
 }

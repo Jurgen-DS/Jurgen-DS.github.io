@@ -1,3 +1,19 @@
+.carousel{
+  height: 79.2vh !important;
+  background-color: #000;
+}
+
+.carousel .carousel-item > img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .arrow-container {
     position: absolute;
     top: 50%;
@@ -55,4 +71,34 @@
 .left-arrow:hover::before, .left-arrow:hover::after,
 .right-arrow:hover::before, .right-arrow:hover::after {
   background-color: #fff;
+}
+
+
+/* Breakpoint for small screens (600px to 767px) */
+@media only screen and (max-width: 600px) {
+}
+
+/* Breakpoint for medium screens (768px to 991px) */
+@media only screen and (max-width: 768px) {
+}
+
+/* Breakpoint for large screens (992px to 1199px) */
+@media only screen and (max-width: 992px) {
+
+  .carousel{
+    height: 100vh !important;
+    background-color: #000;
+  }
+
+  .project .details .content{
+    width:  100%;
+  }
+}
+
+/* Breakpoint for extra large screens (1200px and up) */
+@media only screen and (max-width: 1200px) {
+}
+
+/* Breakpoint for desktop (1200px and up) */
+@media only screen and (min-width: 1200px) {
 }
