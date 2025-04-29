@@ -479,8 +479,12 @@ section {
 }
 
 .contact .input-field input:focus + label,
-.contact .input-field textarea:focus + label{
-    color: #000 !important;
+.contact .input-field textarea:focus + label,
+.contact .input-field input:focus,
+.contact .input-field textarea:focus,
+.contact .input-field input,
+.contact .input-field textarea{
+    color: #C8C1BC !important;
 }
 
 .contact .input-field input:focus,
