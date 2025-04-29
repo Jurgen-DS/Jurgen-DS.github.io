@@ -1,5 +1,3 @@
-// M.AutoInit();
-
 $(document).ready(function () {
 
     $('.nav a').on('click', function() {
@@ -169,23 +167,18 @@ $(document).ready(function () {
         // Clear the current image or video
         $('#Alt').empty();
     
-        // Check if there's a video
-        var video = $(this).find('.item-details video');
-        if (video.length > 0) {
-            $('#Alt').show();
-            $('#Alt').append(video.clone());
-            $('#GalleryCarousel').hide();
-            $('.selected .arrow-container').hide();
-            return;
-        }
-    
-        // Check if there's only a single image
+        // Check if there's only a single image or video
         var singleImg = $(this).find('.item-details img');
-        if (singleImg.length === 1) {
+        var video = $(this).find('.item-details video');
+        if (singleImg.length + video.length === 1) {
             $('#Alt').show();
-            $('#Alt').append(singleImg.clone());
             $('#GalleryCarousel').hide();
             $('.selected .arrow-container').hide();
+            if(singleImg.length > video.length){
+                $('#Alt').append(singleImg.clone());
+            }else{
+                $('#Alt').append(video.clone());
+            }
             return;
         }
 
@@ -227,29 +220,5 @@ $(document).ready(function () {
     // Close / hide gallery details
     $('.selected .close-icon, .selected .bg').on('click', function() {
         $('.selected').removeClass('active');
-    });
-
-    // Initialize EmailJS
-    (function(){
-        emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
-    })();
-
-    // Handle form submission
-    document.getElementById('form').addEventListener('submit', function(event){
-        event.preventDefault();
-
-        // Collect form data
-        const user_email = document.getElementById('email').value;
-        const message = document.getElementById('message').value;
-
-        // Send email via EmailJS
-        emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', this)
-            .then(function(response) {
-                alert('Email sent successfully!');
-                console.log('Success:', response);
-            }, function(error) {
-                alert('Failed to send email.');
-                console.log('Error:', error);
-            });
     });
 });
