@@ -198,7 +198,7 @@ header h1 {
 }
 
 section {
-    background-color: #191919;
+    background-color: #1a1a1a;
     padding: 30px;
 }
 
@@ -251,7 +251,7 @@ section {
 }
 
 .projectOne{
-    background-image: url('../resources/images/banners/artistbanner.png'); /* URL of the image */
+    background-image: url('../resources/images/banners/goofylittleguybanner.png'); /* URL of the image */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -266,7 +266,7 @@ section {
 }
 
 .projectThree{
-    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-image: url('../resources/images/banners/artistbanner.png'); /* URL of the image */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -292,7 +292,7 @@ section {
 }
 
 .project .text{
-    background: rgba(255, 255, 255, 0.1);
+    background: #1a1a1a;
     padding: 30px;
 }
 
@@ -337,12 +337,12 @@ section {
     transform: translate(-50%, -50%);
 }
 
-.gallary {
+.gallery {
     margin-top: 30px;
     margin-bottom: 30px;
 }
 
-.gallary .row{
+.gallery .row{
     margin-bottom: 0;
 }
 
@@ -384,16 +384,16 @@ section {
     margin-bottom: 15px;
 }
 
-.gallary .item-details{
+.gallery .item-details{
     display: none;
 }
 
-.gallary .btn{
+.gallery .btn{
     display: none;
     width: 100%;
 }
 
-.gallary .selected{
+.gallery .selected{
     position: fixed;
     z-index: -1;
     top: 0;
@@ -404,14 +404,18 @@ section {
     transition: 0.2s ease-in-out;
 }
 
-.gallary .selected .item-content{
+.gallery .selected .item-content{
     padding: 90px;
 }
 
-.gallary .selected.active {
+.gallery .selected.active {
     z-index: 2;
     opacity: 1;
     visibility: visible;
+}
+
+.gallery .item.empty{
+    pointer-events: none;
 }
 
 .close-icon {

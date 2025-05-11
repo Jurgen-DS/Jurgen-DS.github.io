@@ -2,7 +2,8 @@
   height: 79.2vh !important;
 }
 
-.carousel .carousel-item > img {
+.carousel .carousel-item > img,
+.carousel .carousel-item > video {
   width: auto;
   max-width: 100%;
   height: auto;

@@ -63,12 +63,12 @@ $(document).ready(function () {
     // Get the carousel instance
     var carouselInstanceOne = M.Carousel.getInstance(document.querySelector('#ProjectCarouselOne'));
 
-    // // Previous button action
+    // Previous button action
     document.getElementById('onePrev').addEventListener('click', function() {
         carouselInstanceOne.prev();
     });
 
-    // // Next button action
+    // Next button action
     document.getElementById('oneNext').addEventListener('click', function() {
         carouselInstanceOne.next();
     });
@@ -81,15 +81,15 @@ $(document).ready(function () {
         interval: 2000      // Time between transitions in milliseconds
     });
 
-    // // Get the carousel instance
+    // Get the carousel instance
     var carouselInstanceTwo = M.Carousel.getInstance(document.querySelector('#ProjectCarouselTwo'));
 
-    // // Previous button action
+    // Previous button action
     document.getElementById('twoPrev').addEventListener('click', function() {
         carouselInstanceTwo.prev();
     });
 
-    // // Next button action
+    // Next button action
     document.getElementById('twoNext').addEventListener('click', function() {
         carouselInstanceTwo.next();
     });
@@ -102,39 +102,39 @@ $(document).ready(function () {
         interval: 2000      // Time between transitions in milliseconds
     });
 
-    // // Get the carousel instance
+    // Get the carousel instance
     var carouselInstanceThree = M.Carousel.getInstance(document.querySelector('#ProjectCarouselThree'));
 
-    // // Previous button action
+    // Previous button action
     document.getElementById('threePrev').addEventListener('click', function() {
         carouselInstanceThree.prev();
     });
 
-    // // Next button action
+    // Next button action
     document.getElementById('threeNext').addEventListener('click', function() {
         carouselInstanceThree.next(); 
     });
 
-    var projectFour = document.querySelectorAll('#ProjectCarouselFour');
-    var projectinstance = M.Carousel.init(projectFour, {
-        fullWidth: true,    // Makes the carousel span the entire width
-        indicators: true,   // Show navigation indicators
-        autoplay: true,     // Enables automatic transition
-        interval: 2000      // Time between transitions in milliseconds
-    });
+    // var projectFour = document.querySelectorAll('#ProjectCarouselFour');
+    // var projectinstance = M.Carousel.init(projectFour, {
+    //     fullWidth: true,    // Makes the carousel span the entire width
+    //     indicators: true,   // Show navigation indicators
+    //     autoplay: true,     // Enables automatic transition
+    //     interval: 2000      // Time between transitions in milliseconds
+    // });
 
     // // Get the carousel instance
-    var carouselInstanceFour = M.Carousel.getInstance(document.querySelector('#ProjectCarouselFour'));
+    // var carouselInstanceFour = M.Carousel.getInstance(document.querySelector('#ProjectCarouselFour'));
 
     // // Previous button action
-    document.getElementById('fourPrev').addEventListener('click', function() {
-        carouselInstanceFour.prev();
-    });
+    // document.getElementById('fourPrev').addEventListener('click', function() {
+    //     carouselInstanceFour.prev();
+    // });
 
     // // Next button action
-    document.getElementById('fourNext').addEventListener('click', function() {
-        carouselInstanceFour.next();
-    });
+    // document.getElementById('fourNext').addEventListener('click', function() {
+    //     carouselInstanceFour.next();
+    // });
 
     var gallery = document.querySelectorAll('#GalleryCarousel');
     var galleryinstance = M.Carousel.init(gallery, {
