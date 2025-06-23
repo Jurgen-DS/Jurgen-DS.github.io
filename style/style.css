@@ -273,7 +273,7 @@ section {
 }
 
 .projectFour{
-    background-image: url('https://placehold.co/2560x1440/EEE/000'); /* URL of the image */
+    background-image: url('../resources/images/banners/modmonsterbanner.png'); /* URL of the image */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

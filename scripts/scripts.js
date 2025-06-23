@@ -115,26 +115,26 @@ $(document).ready(function () {
         carouselInstanceThree.next(); 
     });
 
-    // var projectFour = document.querySelectorAll('#ProjectCarouselFour');
-    // var projectinstance = M.Carousel.init(projectFour, {
-    //     fullWidth: true,    // Makes the carousel span the entire width
-    //     indicators: true,   // Show navigation indicators
-    //     autoplay: true,     // Enables automatic transition
-    //     interval: 2000      // Time between transitions in milliseconds
-    // });
+    var projectFour = document.querySelectorAll('#ProjectCarouselFour');
+    var projectinstance = M.Carousel.init(projectFour, {
+        fullWidth: true,    // Makes the carousel span the entire width
+        indicators: true,   // Show navigation indicators
+        autoplay: true,     // Enables automatic transition
+        interval: 2000      // Time between transitions in milliseconds
+    });
 
-    // // Get the carousel instance
-    // var carouselInstanceFour = M.Carousel.getInstance(document.querySelector('#ProjectCarouselFour'));
+    // Get the carousel instance
+    var carouselInstanceFour = M.Carousel.getInstance(document.querySelector('#ProjectCarouselFour'));
 
-    // // Previous button action
-    // document.getElementById('fourPrev').addEventListener('click', function() {
-    //     carouselInstanceFour.prev();
-    // });
+    // Previous button action
+    document.getElementById('fourPrev').addEventListener('click', function() {
+        carouselInstanceFour.prev();
+    });
 
-    // // Next button action
-    // document.getElementById('fourNext').addEventListener('click', function() {
-    //     carouselInstanceFour.next();
-    // });
+    // Next button action
+    document.getElementById('fourNext').addEventListener('click', function() {
+        carouselInstanceFour.next();
+    });
 
     var gallery = document.querySelectorAll('#GalleryCarousel');
     var galleryinstance = M.Carousel.init(gallery, {
