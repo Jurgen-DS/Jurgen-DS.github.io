@@ -1,18 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jurgen de Smit — Portfolio</title>
-  <meta name="description" content="Portfolio of Jurgen de Smit, multidisciplinary designer.">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jurgen de Smit — Portfolio</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main>
-    <h1>Jurgen de Smit</h1>
-    <p>Multidisciplinary Designer — portfolio coming soon.</p>
-  </main>
 
-  <script src="js/main.js"></script>
+<!-- INTRO -->
+<div id="intro">
+  <div class="mark" id="intro-mark">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="100" height="100" fill="#fff"/>
+    </svg>
+  </div>
+  <h1 class="reveal-text">JURGEN DE SMIT</h1>
+  <p class="reveal-text">DESIGNER & MAKER</p>
+  <button id="skip-intro">Skip</button>
+</div>
+
+<!-- NAV -->
+<header>
+  <button id="logo-btn" aria-label="Replay intro and return to Work">
+    <div class="mark" id="nav-mark">
+      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="32" height="32" fill="#fff"/>
+      </svg>
+    </div>
+  </button>
+  <nav>
+    <ul>
+      <li>
+        <button class="nav-link active" data-page="0">
+          <img class="nav-icon" data-icon="work" src="assets/icons/work_icon.svg" alt="" width="14" height="14">
+          <span class="nav-label">Work</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-link" data-page="1">
+          <span class="nav-icon"></span>
+          <span class="nav-label">About</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-link" data-page="2">
+          <span class="nav-icon"></span>
+          <span class="nav-label">Contact</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<div id="pages">
+
+  <!-- WORK -->
+  <section class="page" id="page-work">
+
+    <div class="work-row work-row-top">
+      <article class="project" data-count="3">
+        <div class="project-frame">
+          <img class="active" src="assets/images/i-am-uman-01.svg" alt="I Am Uman">
+          <img src="assets/images/i-am-uman-02.svg" alt="">
+          <video muted loop playsinline preload="none" data-duration="4000" src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
+        </div>
+        <div class="project-overlay-scrim"></div>
+        <div class="dots"><span class="active"></span><span></span><span></span></div>
+        <div class="project-caption">
+          <h2 class="reveal-text">I Am Uman</h2>
+          <span class="reveal-text">Graduation show —<br>St. Joost / DDW 2026</span>
+        </div>
+        <div class="project-index">01</div>
+      </article>
+
+      <article class="project" data-count="3">
+        <div class="project-frame">
+          <img class="active" src="assets/images/work/cell-buddies-01.svg" alt="Cell Buddies">
+          <img src="assets/images/work/cell-buddies-02.svg" alt="">
+          <img src="assets/images/work/cell-buddies-03.svg" alt="">
+        </div>
+        <div class="project-overlay-scrim"></div>
+        <div class="dots"><span class="active"></span><span></span><span></span></div>
+        <div class="project-caption">
+          <h2 class="reveal-text">Cell Buddies</h2>
+          <span class="reveal-text">Studio Brute Beesten —<br>Co-Director &<br>Set Design</span>
+        </div>
+        <div class="project-index">02</div>
+      </article>
+
+      <article class="project" data-count="2">
+        <div class="project-frame">
+          <img class="active" src="assets/images/work/prayer-01.svg" alt="Prayer for Flies">
+          <img src="assets/images/work/prayer-02.svg" alt="">
+        </div>
+        <div class="project-overlay-scrim"></div>
+        <div class="dots"><span class="active"></span><span></span></div>
+        <div class="project-caption">
+          <h2 class="reveal-text">Prayer for Flies</h2>
+          <span class="reveal-text">Studio Polymorf —<br>Stevenskerk Nijmegen</span>
+        </div>
+        <div class="project-index">03</div>
+      </article>
+    </div>
+
+    <div class="work-row work-row-bottom">
+      <article class="project" data-count="2">
+        <div class="project-frame">
+          <img class="active" src="assets/images/work/modular-01.svg" alt="Modular Monsters">
+          <img src="assets/images/work/modular-02.svg" alt="">
+        </div>
+        <div class="project-overlay-scrim"></div>
+        <div class="dots"><span class="active"></span><span></span></div>
+        <div class="project-caption">
+          <h2 class="reveal-text">Modular Monsters</h2>
+          <span class="reveal-text">Design Museum<br>Den Bosch</span>
+        </div>
+        <div class="project-index">04</div>
+      </article>
+
+      <article class="project placeholder-project" data-count="1">
+        <div class="project-frame">
+          <img class="active" src="assets/images/work/next-project.svg" alt="">
+        </div>
+        <div class="project-overlay-scrim"></div>
+        <div class="dots"><span class="active"></span></div>
+        <div class="project-caption">
+          <h2 class="reveal-text">Coming soon</h2>
+          <span class="reveal-text">Slot reserved for<br>the next project</span>
+        </div>
+        <div class="project-index">05</div>
+      </article>
+
+      <article class="project placeholder-project" data-count="1">
+        <div class="project-frame">
+          <img class="active" src="assets/images/work/next-project.svg" alt="">
+        </div>
+        <div class="project-overlay-scrim"></div>
+        <div class="dots"><span class="active"></span></div>
+        <div class="project-caption">
+          <h2 class="reveal-text">Coming soon</h2>
+          <span class="reveal-text">Slot reserved for<br>the next project</span>
+        </div>
+        <div class="project-index">06</div>
+      </article>
+    </div>
+
+    <div id="dump">
+      <h2 id="dump-heading" class="reveal-text reveal-letters" data-stagger="55">Things I make<br>when nobody<br>asked.</h2>
+      <div class="dump-grid">
+        <div><img src="assets/images/dump/01.svg" alt="" data-title="Sketch 01" data-info="Quick idea, pen on paper."></div>
+        <div><img src="assets/images/dump/02.svg" alt="" data-title="Sketch 02" data-info="Concept exploration."></div>
+        <div><img src="assets/images/dump/03.svg" alt="" data-title="Study 03" data-info="Material test."></div>
+        <div><img src="assets/images/dump/04.svg" alt="" data-title="Study 04" data-info="Form exploration."></div>
+        <div><img src="assets/images/dump/05.svg" alt="" data-title="Render 05" data-info="Blender test render."></div>
+        <div><img src="assets/images/dump/06.svg" alt="" data-title="Render 06" data-info="Lighting study."></div>
+        <div><img src="assets/images/dump/07.svg" alt="" data-title="Print 07" data-info="3D print test."></div>
+        <div><img src="assets/images/dump/08.svg" alt="" data-title="Print 08" data-info="Prototype iteration."></div>
+        <div><img src="assets/images/dump/09.svg" alt="" data-title="Doodle 09" data-info="Just for fun."></div>
+      </div>
+    </div>
+
+    <footer class="site-footer">© 2026 Jurgen de Smit — All rights reserved.</footer>
+
+  </section>
+
+  <!-- ABOUT -->
+  <section class="page" id="page-about">
+    <div class="about-wrap">
+      <div class="about-inner">
+        <div class="about-text">
+          <h2 class="reveal-text reveal-letters" data-stagger="100">About</h2>
+          <p class="reveal-text">Multidisciplinary designer and maker with a current focus on 3D, physical fabrication and interactive prototyping.</p>
+          <p class="reveal-text">Recently graduated cum laude from St. Joost School of Art & Design, and completed a design internship at Studio Polymorf.</p>
+
+          <div class="faq">
+            <div class="faq-item">
+              <button class="faq-q">
+                <span class="faq-q-text reveal-text">What kind of work do you make?</span>
+                <span class="faq-q-icon">+</span>
+              </button>
+              <div class="faq-a"><div class="faq-a-inner">Installations, speculative design objects, stop-motion and interactive prototypes — work that sits between 3D, physical fabrication and storytelling.</div></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-q">
+                <span class="faq-q-text reveal-text">What tools do you use?</span>
+                <span class="faq-q-icon">+</span>
+              </button>
+              <div class="faq-a"><div class="faq-a-inner">Blender for 3D, Godot/GDScript for interactive pieces, and the general fabrication workshop for physical prototyping.</div></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-q">
+                <span class="faq-q-text reveal-text">Are you available for work?</span>
+                <span class="faq-q-icon">+</span>
+              </button>
+              <div class="faq-a"><div class="faq-a-inner">Yes — reach out on the Contact page.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-divider"></div>
+
+        <div class="about-photo">
+          <div id="face-canvas" aria-label="A small 3D head that follows your cursor" role="img"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">© 2026 Jurgen de Smit — All rights reserved.</footer>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="page" id="page-contact">
+    <div class="contact-inner">
+      <div class="contact-left">
+        <h2 class="reveal-text reveal-letters" data-stagger="140">Let's talk.</h2>
+        <a class="contact-email" href="mailto:desmitjurgen@gmail.com">desmitjurgen@gmail.com</a>
+        <div class="contact-meta">
+          <span>Dongen, NL</span>
+          <a href="https://jurgen-ds.github.io" target="_blank" rel="noopener">Portfolio</a>
+        </div>
+      </div>
+
+      <div class="contact-divider"></div>
+
+      <form id="contact-form" class="contact-form">
+        <label for="cf-name">Name</label>
+        <input type="text" id="cf-name" name="name" required>
+
+        <label for="cf-email">Email</label>
+        <input type="email" id="cf-email" name="email" required>
+
+        <label for="cf-message">Message</label>
+        <textarea id="cf-message" name="message" rows="5" required></textarea>
+
+        <button type="submit">Send</button>
+        <p id="cf-status"></p>
+      </form>
+    </div>
+
+    <footer class="site-footer">© 2026 Jurgen de Smit — All rights reserved.</footer>
+  </section>
+
+</div>
+
+<!-- PROJECT OVERLAY -->
+<div id="overlay">
+  <div class="overlay-header">
+    <h2 id="overlay-title">Project title</h2>
+    <button id="close-overlay">Close ✕</button>
+  </div>
+  <div class="overlay-body" id="overlay-body"></div>
+</div>
+
+<!-- DUMP LIGHTBOX -->
+<div id="dump-lightbox">
+  <button id="lightbox-close" aria-label="Close">✕</button>
+  <button id="lightbox-prev" aria-label="Previous">‹</button>
+  <div class="lightbox-image-wrap">
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption-zone">
+      <div class="lightbox-caption" id="lightbox-caption">
+        <h3 id="lightbox-title"></h3>
+        <p id="lightbox-info"></p>
+      </div>
+    </div>
+  </div>
+  <button id="lightbox-next" aria-label="Next">›</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/face-model.js"></script>
 </body>
 </html>
