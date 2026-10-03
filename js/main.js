@@ -643,3 +643,76 @@ document.querySelectorAll("img.nav-icon[data-icon]").forEach(async img => {
   const svg = await inlineIcon(img);
   if(svg && anim) setupIconHover(svg, button, anim);
 });
+
+/* ---------- Nav: selected pill + hover pill that follows the cursor ---------- */
+const siteNav = document.getElementById("site-nav");
+const navPill = document.getElementById("nav-pill");
+const navHover = document.getElementById("nav-hover");
+const NAV_MAGNET = 0;    // how far the hover pill leans toward the cursor (0 = off)
+const NAV_MAGNET_MAX = 4;   // cap in px
+
+function setHoverClass(li){
+  siteNav.querySelectorAll("li.is-hover").forEach(el => el.classList.remove("is-hover"));
+  if(li) li.classList.add("is-hover");
+}
+
+function placePill(pill, li, animate, offsetX = 0){
+  if(!animate) pill.style.transition = "none";
+  const r = li.getBoundingClientRect();     // fractional sizes, no rounding gaps
+  const n = siteNav.getBoundingClientRect();
+  pill.style.width = r.width + "px";
+  pill.style.transform = `translateX(${r.left - n.left + offsetX}px)`;
+  if(!animate){ void pill.offsetWidth; pill.style.transition = ""; }
+}
+
+/* selected pill: follows the .active class that goToPage() already toggles */
+function moveNavPill(animate = true){
+  const active = siteNav.querySelector(".nav-link.active");
+  if(active) placePill(navPill, active.parentElement, animate);
+}
+const navObserver = new MutationObserver(() => moveNavPill(true));
+siteNav.querySelectorAll(".nav-link").forEach(btn =>
+  navObserver.observe(btn, { attributes: true, attributeFilter: ["class"] }));
+
+/* hover pill */
+let hoverLi = null;
+let hoverShown = false;
+
+function showHover(li, e){
+  let offset = 0;
+  if(e && NAV_MAGNET){
+    const r = li.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    offset = Math.max(-NAV_MAGNET_MAX, Math.min(NAV_MAGNET_MAX, dx * NAV_MAGNET));
+  }
+  placePill(navHover, li, hoverShown, offset);
+  navHover.style.opacity = "1";
+  setHoverClass(li);
+  hoverShown = true;
+  hoverLi = li;
+}
+function hideHover(){
+  navHover.style.opacity = "0";
+  setHoverClass(null);
+  hoverShown = false;
+}
+
+siteNav.addEventListener("pointermove", (e) => {
+  if(e.pointerType !== "mouse") return;
+  const li = e.target.closest("li");
+  if(li) showHover(li, e);
+});
+siteNav.addEventListener("pointerleave", hideHover);
+siteNav.addEventListener("focusin", (e) => {
+  const btn = e.target.closest(".nav-link");
+  if(btn && btn.matches(":focus-visible")) showHover(btn.parentElement);
+});
+siteNav.addEventListener("focusout", hideHover);
+
+function relayoutNav(){
+  moveNavPill(false);
+  if(hoverShown && hoverLi) placePill(navHover, hoverLi, false);
+}
+window.addEventListener("resize", relayoutNav);
+moveNavPill(false);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(relayoutNav);
