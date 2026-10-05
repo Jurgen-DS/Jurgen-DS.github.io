@@ -570,8 +570,10 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
   work: {
-    stepMs: 450,                          // keep equal to the CSS transition (.45s)
-    sequence: ["m", "r", "l", "m"],       // middle, right, left, back to middle
+    stepMs: 420,                         // duration of each move
+    returnMs: 350,                       // way back to the resting bars on mouse-out
+    ease: "cubic-bezier(.45,0,.2,1)",    // each move accelerates and settles
+    sequence: ["m", "r", "l", "m"],      // middle, right, left, back to middle
     states: {
       m: focusBoxes(1, WORK_ICON),
       r: focusBoxes(2, WORK_ICON),
@@ -600,41 +602,60 @@ async function inlineIcon(img){
   }
 }
 
-// Moves and scales an element so its own bounding box lands on `box`.
-function fitTo(el, box){
+// CSS transform that moves and scales an element so its own bounding box lands on `box`.
+function boxTransform(el, box){
   const b = el.getBBox();
   const sx = box.w / b.width;
   const sy = box.h / b.height;
-  el.style.transform = `translate(${box.x - b.x * sx}px, ${box.y - b.y * sy}px) scale(${sx}, ${sy})`;
+  return `translate(${box.x - b.x * sx}px, ${box.y - b.y * sy}px) scale(${sx}, ${sy})`;
 }
 
 function setupIconHover(svg, button, anim){
-  let timers = [];
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  function stop(){
-    timers.forEach(clearTimeout);
-    timers = [];
-    svg.querySelectorAll("[id]").forEach(el => { el.style.transform = ""; });  // eases back to rest
-  }
+  const parts = Array.from(svg.querySelectorAll("[id]"));
+  let running = [];
+
+  const currentTransform = el => getComputedStyle(el).transform;   // "none" or a matrix
+  function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
+
+  // One continuous timeline per bar: current position, then every state in turn.
   function play(){
-    stop();
-    anim.sequence.forEach((name, i) => {
-      timers.push(setTimeout(() => {
-        const state = anim.states[name];
-        Object.keys(state).forEach(id => {
-          const el = svg.querySelector(`[id="${id}"]`);
-          if(el) fitTo(el, state[id]);
-        });
-      }, i * anim.stepMs));
+    const froms = parts.map(currentTransform);    // read before cancelling
+    stopRunning();
+    parts.forEach((el, i) => {
+      const frames = [{ transform: froms[i] }];
+      anim.sequence.forEach(name => {
+        const box = anim.states[name][el.id];
+        frames.push({ transform: box ? boxTransform(el, box) : "none" });
+      });
+      frames.forEach(f => { f.easing = anim.ease; });
+      running.push(el.animate(frames, {
+        duration: anim.stepMs * anim.sequence.length,
+        fill: "forwards"                          // holds the last state while hovered
+      }));
+    });
+  }
+
+  // Ease back to the resting bars from wherever they are right now.
+  function rest(){
+    const froms = parts.map(currentTransform);
+    stopRunning();
+    parts.forEach((el, i) => {
+      if(froms[i] === "none") return;
+      running.push(el.animate(
+        [{ transform: froms[i] }, { transform: "none" }],
+        { duration: anim.returnMs, easing: anim.ease }
+      ));
     });
   }
 
   button.addEventListener("mouseenter", () => {
     if(window.matchMedia("(hover: hover)").matches) play();
   });
-  button.addEventListener("mouseleave", stop);
+  button.addEventListener("mouseleave", rest);
   button.addEventListener("focus", () => { if(button.matches(":focus-visible")) play(); });
-  button.addEventListener("blur", stop);
+  button.addEventListener("blur", rest);
 }
 
 document.querySelectorAll("img.nav-icon[data-icon]").forEach(async img => {

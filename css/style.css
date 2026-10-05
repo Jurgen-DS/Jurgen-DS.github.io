@@ -175,7 +175,6 @@ svg.nav-icon[data-icon] *{
   fill:inherit;
   transform-box:view-box;
   transform-origin:0 0;
-  transition:transform .45s cubic-bezier(.65,0,.35,1);
 }
 
 /* ---------- SLIDING PAGES ---------- */
