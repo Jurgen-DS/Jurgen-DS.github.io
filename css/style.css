@@ -165,7 +165,7 @@ header{
 }
 
 /* icons */
-.nav-link .nav-icon{ width:14px; height:14px; flex:none; display:block; }
+.nav-link .nav-icon{ width:16px; height:16px; flex:none; display:block; }
 .nav-link span.nav-icon{ background:currentColor; opacity:.3; transition:opacity .3s ease; }   /* placeholder */
 .nav-link.active span.nav-icon{ opacity:1; }
 img.nav-icon[data-icon]{ transition:filter .3s ease; }
@@ -175,6 +175,7 @@ svg.nav-icon[data-icon] *{
   fill:inherit;
   transform-box:view-box;
   transform-origin:0 0;
+  shape-rendering:crispEdges;
 }
 
 /* ---------- SLIDING PAGES ---------- */
