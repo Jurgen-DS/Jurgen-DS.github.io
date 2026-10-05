@@ -175,8 +175,8 @@ svg.nav-icon[data-icon] *{
   fill:inherit;
   transform-box:view-box;
   transform-origin:0 0;
-  shape-rendering:crispEdges;
 }
+svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 
 /* ---------- SLIDING PAGES ---------- */
 #pages{

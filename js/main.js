@@ -567,6 +567,12 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
   return boxes;
 }
 
+// About icon (64x64 grid): the head's box at rest, and how far it moves.
+// 4 units = exactly 1px at 16px, so every state lands on whole pixels.
+const ABOUT_HEAD = { x: 20, y: 4, w: 24, h: 24 };
+const ABOUT_MOVE = 4;
+const headAt = (dx, dy) => ({ head: { ...ABOUT_HEAD, x: ABOUT_HEAD.x + dx, y: ABOUT_HEAD.y + dy } });
+
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
   work: {
@@ -578,6 +584,20 @@ const ICON_ANIMATIONS = {
       m: focusBoxes(1, WORK_ICON),
       r: focusBoxes(2, WORK_ICON),
       l: focusBoxes(0, WORK_ICON)
+    }
+  },
+  about: {
+    stepMs: 240,
+    returnMs: 260,
+    ease: "cubic-bezier(.45,0,.2,1)",
+    sequence: ["up", "down", "rest"],        // bob: up, down, settle
+    // sequence: ["left", "right", "rest"],  // swap in for a head turn instead
+    states: {
+      up:    headAt(0, -ABOUT_MOVE),
+      down:  headAt(0,  ABOUT_MOVE),
+      left:  headAt(-ABOUT_MOVE, 0),
+      right: headAt( ABOUT_MOVE, 0),
+      rest:  {}
     }
   }
 };
