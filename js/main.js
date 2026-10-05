@@ -570,9 +570,9 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
   work: {
-    stepMs: 420,                         // duration of each move
+    stepMs: 600,                         // duration of each move
     returnMs: 350,                       // way back to the resting bars on mouse-out
-    ease: "cubic-bezier(.45,0,.2,1)",    // each move accelerates and settles
+    ease: "cubic-bezier(.65,0,.35,1)",    // each move accelerates and settles
     sequence: ["m", "r", "l", "m"],      // middle, right, left, back to middle
     states: {
       m: focusBoxes(1, WORK_ICON),
