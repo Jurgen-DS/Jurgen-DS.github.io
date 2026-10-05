@@ -589,7 +589,7 @@ const ICON_ANIMATIONS = {
   about: {
     stepMs: 600,
     returnMs: 260,
-    ease: "cubic-bezier(.65,0,.35,1)",
+    ease: "cubic-bezier(.45,0,.2,1)",
     sequence: ["left", "right", "rest"],        // bob: up, down, settle
     // sequence: ["left", "right", "rest"],  // swap in for a head turn instead
     states: {
