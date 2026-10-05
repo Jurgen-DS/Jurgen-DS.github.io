@@ -549,7 +549,7 @@ contactForm.addEventListener("submit", (e) => {
 
 // Tunable numbers for the work icon, in viewBox units.
 // gap and restInset must match the drawing.
-const WORK_ICON = { size: 64, gap: 5, narrow: 10, restInset: 5 };
+const WORK_ICON = { size: 64, gap: 8, narrow: 8, restInset: 4 };
 
 // One bar is "focused": wide and full height. The others are narrow and keep their rest height.
 function focusBoxes(focus, { size, gap, narrow, restInset }){
