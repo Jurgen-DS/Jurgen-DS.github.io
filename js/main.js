@@ -587,7 +587,7 @@ const ICON_ANIMATIONS = {
     }
   },
   about: {
-    stepMs: 240,
+    stepMs: 600,
     returnMs: 260,
     ease: "cubic-bezier(.45,0,.2,1)",
     sequence: ["up", "down", "rest"],        // bob: up, down, settle
