@@ -587,7 +587,7 @@ const ICON_ANIMATIONS = {
     }
   },
   about: {
-    stepMs: 600,                       // time for one unit of weight
+    stepMs: 300,                       // time for one unit of weight
     weights: [1, 2, 1],                 // rest to left = 1, left to right = 2 (twice as far), right to rest = 1
     returnMs: 350,
     ease: "cubic-bezier(.37,0,.63,1)",    // sine ease: smooth start and end, no sharp snap
