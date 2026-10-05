@@ -590,7 +590,7 @@ const ICON_ANIMATIONS = {
     stepMs: 600,
     returnMs: 260,
     ease: "cubic-bezier(.45,0,.2,1)",
-    sequence: ["up", "down", "rest"],        // bob: up, down, settle
+    sequence: ["left", "right", "rest"],        // bob: up, down, settle
     // sequence: ["left", "right", "rest"],  // swap in for a head turn instead
     states: {
       up:    headAt(0, -ABOUT_MOVE),
