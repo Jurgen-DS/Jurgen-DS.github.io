@@ -587,11 +587,12 @@ const ICON_ANIMATIONS = {
     }
   },
   about: {
-    stepMs: 600,
-    returnMs: 260,
-    ease: "cubic-bezier(.45,0,.2,1)",
+    stepMs: 600,                       // time for one unit of weight
+    weights: [1, 2, 1],                 // rest to left = 1, left to right = 2 (twice as far), right to rest = 1
+    returnMs: 350,
+    ease: "cubic-bezier(.37,0,.63,1)",    // sine ease: smooth start and end, no sharp snap
     sequence: ["left", "right", "rest"],        // bob: up, down, settle
-    // sequence: ["left", "right", "rest"],  // swap in for a head turn instead
+    // sequence: ["left", "right", "rest"],  ["up", "down", "rest"]// swap in for a head turn instead
     states: {
       up:    headAt(0, -ABOUT_MOVE),
       down:  headAt(0,  ABOUT_MOVE),
@@ -636,28 +637,32 @@ function setupIconHover(svg, button, anim){
   const parts = Array.from(svg.querySelectorAll("[id]"));
   let running = [];
 
-  const currentTransform = el => getComputedStyle(el).transform;   // "none" or a matrix
+  const currentTransform = el => getComputedStyle(el).transform;
   function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
 
-  // One continuous timeline per bar: current position, then every state in turn.
+  // One continuous timeline per part. Each move gets a share of the total time
+  // given by its weight, so a long move (left to right) isn't faster than a short one.
   function play(){
-    const froms = parts.map(currentTransform);    // read before cancelling
+    const froms = parts.map(currentTransform);
     stopRunning();
+    const weights = anim.weights || anim.sequence.map(() => 1);
+    const total = weights.reduce((a, b) => a + b, 0);
     parts.forEach((el, i) => {
-      const frames = [{ transform: froms[i] }];
-      anim.sequence.forEach(name => {
+      const frames = [{ transform: froms[i], offset: 0 }];
+      let acc = 0;
+      anim.sequence.forEach((name, s) => {
+        acc += weights[s];
         const box = anim.states[name][el.id];
-        frames.push({ transform: box ? boxTransform(el, box) : "none" });
+        frames.push({ transform: box ? boxTransform(el, box) : "none", offset: acc / total });
       });
       frames.forEach(f => { f.easing = anim.ease; });
       running.push(el.animate(frames, {
-        duration: anim.stepMs * anim.sequence.length,
-        fill: "forwards"                          // holds the last state while hovered
+        duration: anim.stepMs * total,
+        fill: "forwards"
       }));
     });
   }
 
-  // Ease back to the resting bars from wherever they are right now.
   function rest(){
     const froms = parts.map(currentTransform);
     stopRunning();
