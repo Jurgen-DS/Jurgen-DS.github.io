@@ -571,7 +571,7 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
 const ABOUT_HEAD_ARC = {
   radius: 24,                       // head center to neck pivot, in units
   swingDeg: 34,                     // angle of a swing with size 1
-  lobes: [1, 1, 0.65, 0.35],      // size of each swing in order: left, right, left, right.
+  lobes: [1, 1, 0,8, 0.65, 0.35],      // size of each swing in order: left, right, left, right.
                                     // Add or remove numbers for more or fewer swings
   edgeEase: 1,                      // 1 = soft start and stop; lower = more even timing, more abrupt start
   lean: true                        // true: head dips as it leans, false: head lifts
@@ -618,7 +618,7 @@ const ICON_ANIMATIONS = {
   },
   about: {
     motion: (id, t) => id === "head" ? headSwing(t) : null,   // only the head moves
-    durationMs: 1800,
+    durationMs: 1600,
     samples: 60,
     returnMs: 300,                          // way back on mouse-out
     ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
