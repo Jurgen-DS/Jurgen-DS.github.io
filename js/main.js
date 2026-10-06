@@ -606,7 +606,7 @@ function headSwing(t){
 // Contact dots: shrink away on hover, then pop back in one by one.
 const CONTACT_DOTS = {
   order: ["dot_left", "dot_mid", "dot_right"],
-  shrinkMs: 10,     // dots pop out when hover starts
+  shrinkMs: 200,     // dots pop out when hover starts
   firstMs: 400,      // when the first dot starts to pop back in (keep at least shrinkMs)
   staggerMs: 350,    // delay between dots
   popMs: 550,        // time each dot takes to pop in
