@@ -606,7 +606,6 @@ const ICON_ANIMATIONS = {
     samples: 60,
     returnMs: 300,                          // way back on mouse-out
     ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
-    }
   }
 };
 
