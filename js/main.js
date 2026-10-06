@@ -567,11 +567,25 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
   return boxes;
 }
 
-// About icon (64x64 grid): the head's box at rest, and how far it moves.
-// 4 units = exactly 1px at 16px, so every state lands on whole pixels.
-const ABOUT_HEAD = { x: 20, y: 4, w: 24, h: 24 };
-const ABOUT_MOVE = 8;
-const headAt = (dx, dy) => ({ head: { ...ABOUT_HEAD, x: ABOUT_HEAD.x + dx, y: ABOUT_HEAD.y + dy } });
+// About head: swings on an arc around the neck, like a pendulum that settles.
+const ABOUT_HEAD_ARC = {
+  radius: 24,       // head center to neck pivot, in units (head cy=16, pivot y=40)
+  swingDeg: 36,     // peak angle before damping; the first swing reaches about 80% of this
+  cycles: 1.5,      // 1.5 = left, right, small wobble, rest. 1 = just left, right, rest
+  damping: 1.2,     // higher = calmer settle and smaller wobble
+  lean: true        // true: head dips as it leans (a tilt), false: head lifts (a sway)
+};
+function headSwing(t){
+  const a = ABOUT_HEAD_ARC;
+  const tau = t * t * (3 - 2 * t);   // smoothstep: eases in and out at both ends
+  const theta = -a.swingDeg * Math.PI / 180
+              * Math.exp(-a.damping * tau)
+              * Math.sin(2 * Math.PI * a.cycles * tau);
+  return {
+    dx: a.radius * Math.sin(theta),
+    dy: a.radius * (1 - Math.cos(theta)) * (a.lean ? 1 : -1)
+  };
+}
 
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
@@ -587,18 +601,11 @@ const ICON_ANIMATIONS = {
     }
   },
   about: {
-    stepMs: 300,                       // time for one unit of weight
-    weights: [1, 2, 1],                 // rest to left = 1, left to right = 2 (twice as far), right to rest = 1
-    returnMs: 350,
-    ease: "cubic-bezier(.37,0,.63,1)",    // sine ease: smooth start and end, no sharp snap
-    sequence: ["left", "right", "rest"],        // bob: up, down, settle
-    // sequence: ["left", "right", "rest"],  ["up", "down", "rest"]// swap in for a head turn instead
-    states: {
-      up:    headAt(0, -ABOUT_MOVE),
-      down:  headAt(0,  ABOUT_MOVE),
-      left:  headAt(-ABOUT_MOVE, 0),
-      right: headAt( ABOUT_MOVE, 0),
-      rest:  {}
+    motion: (id, t) => id === "head" ? headSwing(t) : null,   // only the head moves
+    durationMs: 1200,
+    samples: 60,
+    returnMs: 300,                          // way back on mouse-out
+    ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
     }
   }
 };
@@ -640,14 +647,38 @@ function setupIconHover(svg, button, anim){
   const currentTransform = el => getComputedStyle(el).transform;
   function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
 
-  // One continuous timeline per part. Each move gets a share of the total time
-  // given by its weight, so a long move (left to right) isn't faster than a short one.
+  // For icons with a `motion` function: sample the path as many small steps.
+  // motion(id, t) returns {dx, dy} for t from 0 to 1, or null if that part stays still.
+  function motionFrames(el, from){
+    if(!anim.motion || !anim.motion(el.id, 0.5)) return null;
+    const N = anim.samples || 60;
+    const frames = [{ transform: from, offset: 0, easing: "linear" }];
+    for(let k = 1; k <= N; k++){
+      const t = k / N;
+      const m = anim.motion(el.id, t);
+      frames.push({
+        transform: `translate(${m.dx.toFixed(3)}px, ${m.dy.toFixed(3)}px)`,
+        offset: t,
+        easing: "linear"
+      });
+    }
+    return frames;
+  }
+
   function play(){
     const froms = parts.map(currentTransform);
     stopRunning();
-    const weights = anim.weights || anim.sequence.map(() => 1);
+    const weights = anim.weights || (anim.sequence ? anim.sequence.map(() => 1) : []);
     const total = weights.reduce((a, b) => a + b, 0);
+
     parts.forEach((el, i) => {
+      // motion-function icons (About)
+      if(anim.motion){
+        const frames = motionFrames(el, froms[i]);
+        if(frames) running.push(el.animate(frames, { duration: anim.durationMs, fill: "forwards" }));
+        return;
+      }
+      // state-sequence icons (Work)
       const frames = [{ transform: froms[i], offset: 0 }];
       let acc = 0;
       anim.sequence.forEach((name, s) => {
@@ -656,10 +687,7 @@ function setupIconHover(svg, button, anim){
         frames.push({ transform: box ? boxTransform(el, box) : "none", offset: acc / total });
       });
       frames.forEach(f => { f.easing = anim.ease; });
-      running.push(el.animate(frames, {
-        duration: anim.stepMs * total,
-        fill: "forwards"
-      }));
+      running.push(el.animate(frames, { duration: anim.stepMs * total, fill: "forwards" }));
     });
   }
 
