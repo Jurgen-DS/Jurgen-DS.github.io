@@ -567,20 +567,36 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
   return boxes;
 }
 
-// About head: swings on an arc around the neck, like a pendulum that settles.
+// About head: swings on an arc around the neck and settles.
 const ABOUT_HEAD_ARC = {
-  radius: 24,       // head center to neck pivot, in units (head cy=16, pivot y=40)
-  swingDeg: 36,     // peak angle before damping; the first swing reaches about 80% of this
-  cycles: 1.5,      // 1.5 = left, right, small wobble, rest. 1 = just left, right, rest
-  damping: 1.2,     // higher = calmer settle and smaller wobble
-  lean: true        // true: head dips as it leans (a tilt), false: head lifts (a sway)
+  radius: 24,                       // head center to neck pivot, in units
+  swingDeg: 34,                     // angle of a swing with size 1
+  lobes: [0.8, 1, 0.65, 0.35],      // size of each swing in order: left, right, left, right.
+                                    // Add or remove numbers for more or fewer swings
+  edgeEase: 1,                      // 1 = soft start and stop; lower = more even timing, more abrupt start
+  lean: true                        // true: head dips as it leans, false: head lifts
 };
+
+// Smooth size curve through the swing sizes: each swing peaks at exactly its listed size.
+function lobeEnvelope(tau, lobes){
+  const n = lobes.length;
+  const pos = tau * n - 0.5;                    // 0 at the first peak, n-1 at the last
+  if(pos <= 0) return lobes[0];
+  if(pos >= n - 1) return lobes[n - 1];
+  const i = Math.floor(pos);
+  const f = pos - i;
+  const s = (1 - Math.cos(Math.PI * f)) / 2;    // flat at each peak, so peaks keep their size
+  return lobes[i] + (lobes[i + 1] - lobes[i]) * s;
+}
+
 function headSwing(t){
   const a = ABOUT_HEAD_ARC;
-  const tau = t * t * (3 - 2 * t);   // smoothstep: eases in and out at both ends
+  const smooth = t * t * (3 - 2 * t);
+  const tau = t + a.edgeEase * (smooth - t);    // eased time
+  const n = a.lobes.length;
   const theta = -a.swingDeg * Math.PI / 180
-              * Math.exp(-a.damping * tau)
-              * Math.sin(2 * Math.PI * a.cycles * tau);
+              * lobeEnvelope(tau, a.lobes)
+              * Math.sin(n * Math.PI * tau);    // n swings, ending exactly at rest
   return {
     dx: a.radius * Math.sin(theta),
     dy: a.radius * (1 - Math.cos(theta)) * (a.lean ? 1 : -1)
@@ -602,7 +618,7 @@ const ICON_ANIMATIONS = {
   },
   about: {
     motion: (id, t) => id === "head" ? headSwing(t) : null,   // only the head moves
-    durationMs: 1200,
+    durationMs: 1500,
     samples: 60,
     returnMs: 300,                          // way back on mouse-out
     ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
