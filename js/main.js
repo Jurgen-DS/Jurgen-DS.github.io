@@ -606,13 +606,16 @@ function headSwing(t){
 // Contact dots: shrink away on hover, then pop back in one by one.
 const CONTACT_DOTS = {
   order: ["dot_left", "dot_mid", "dot_right"],
-  totalMs: 1300,     // whole animation
-  shrinkMs: 160,     // dots pop out when hover starts
-  firstMs: 300,      // when the first dot starts to pop back in (keep at least shrinkMs)
-  staggerMs: 240,    // delay between dots
-  popMs: 480,        // time each dot takes to pop in
-  peak: 1.1            // how big the pop overshoots (1 = no pop)
+  shrinkMs: 200,     // dots pop out when hover starts
+  firstMs: 350,      // when the first dot starts to pop back in (keep at least shrinkMs)
+  staggerMs: 300,    // delay between dots
+  popMs: 500,        // time each dot takes to pop in
+  peak: 1.05         // how big the pop overshoots (1 = no pop)
 };
+// whole animation: ends exactly when the last dot has finished popping in
+CONTACT_DOTS.totalMs = CONTACT_DOTS.firstMs
+  + (CONTACT_DOTS.order.length - 1) * CONTACT_DOTS.staggerMs
+  + CONTACT_DOTS.popMs;
 
 // Fast rise to the peak, then settle back to 1.
 function popCurve(p, peak){

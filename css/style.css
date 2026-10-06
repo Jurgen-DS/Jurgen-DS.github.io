@@ -92,6 +92,7 @@ header{
   --nav-gap:10px;       /* space between icon and label (was 8) */
   --nav-font:15.5px;    /* label size (was 13) */
   --nav-icon:16px;      /* keep at 16 so the icons stay crisp */
+  --nav-icon-alt:18px;  /* about and contact icons slightly larger as work icon seem too large */
   --nav-r:7px;          /* button corner radius; the box adds the padding to it */
   --nav-time:.55s;
   --nav-ease:cubic-bezier(.3,1.25,.4,1);   /* slight spring; use .65,0,.35,1 for no overshoot */
@@ -184,6 +185,12 @@ svg.nav-icon[data-icon] *{
   transform-origin:0 0;
 }
 svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
+/* bigger About and Contact icons (their shapes look smaller than the Work bars) */
+.nav-link .nav-icon[data-icon="about"],
+.nav-link .nav-icon[data-icon="contact"]{
+  width:var(--nav-icon-alt);
+  height:var(--nav-icon-alt);
+}
 
 /* ---------- SLIDING PAGES ---------- */
 #pages{
