@@ -571,7 +571,7 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
 const ABOUT_HEAD_ARC = {
   radius: 24,                       // head center to neck pivot, in units
   swingDeg: 30,                     // angle of a swing with size 1
-  lobes: [0.9, 1, 0.8, 0.65, 0.35],      // size of each swing in order: left, right, left, right.
+  lobes: [0.9, 1, 0.8, 0.65, 0.35, 0.15],      // size of each swing in order: left, right, left, right.
                                     // Add or remove numbers for more or fewer swings
   edgeEase: 1,                      // 1 = soft start and stop; lower = more even timing, more abrupt start
   lean: true                        // true: head dips as it leans, false: head lifts
@@ -611,7 +611,7 @@ const CONTACT_DOTS = {
   firstMs: 300,      // when the first dot starts to pop back in (keep at least shrinkMs)
   staggerMs: 240,    // delay between dots
   popMs: 480,        // time each dot takes to pop in
-  peak: 1.35         // how big the pop overshoots (1 = no pop)
+  peak: 1            // how big the pop overshoots (1 = no pop)
 };
 
 // Fast rise to the peak, then settle back to 1.
@@ -648,7 +648,8 @@ const ICON_ANIMATIONS = {
     hold: true,
     stepMs: 600,                         // duration of each move
     returnMs: 350,                       // way back to the resting bars on mouse-out
-    ease: "cubic-bezier(.65,0,.35,1)",    // each move accelerates and settles
+    clickReturnMs: 600,                  // way back after the button was clicked (longer)
+    ease: "cubic-bezier(.65,0,.35,1)",   // each move accelerates and settles
     sequence: ["m", "r", "l", "m"],      // middle, right, left, back to middle
     states: {
       m: focusBoxes(1, WORK_ICON),
@@ -720,9 +721,11 @@ function setupIconHover(svg, button, anim){
   let running = [];
   let hovering = false;     // pointer or keyboard focus is on the button
   let committed = false;    // button was clicked mid-animation: let it finish
+  let clicked = false;      // button was clicked since the hover began
 
   const currentTransform = el => getComputedStyle(el).transform;
   const isPlaying = () => running.some(a => a.playState === "running");
+  const returnTime = () => (clicked && anim.clickReturnMs) || anim.returnMs;
   function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
 
   // For icons with a `motion` function: sample the path as many small steps.
@@ -750,8 +753,7 @@ function setupIconHover(svg, button, anim){
     const froms = parts.map(currentTransform);
     stopRunning();
     committed = false;
-    // Icons that end somewhere other than rest (Work) hold their last state while hovered.
-    // Icons that end at rest are released when finished, so they are drawn exactly as at rest.
+    clicked = false;
     const fill = anim.hold ? "forwards" : "none";
     const weights = anim.weights || (anim.sequence ? anim.sequence.map(() => 1) : []);
     const total = weights.reduce((a, b) => a + b, 0);
@@ -776,18 +778,21 @@ function setupIconHover(svg, button, anim){
     // When it has played to its end: if the pointer already left, ease back to rest.
     Promise.all(running.map(a => a.finished)).then(() => {
       committed = false;
-      if(!hovering) rest();
+      if(!hovering){
+        rest(returnTime());
+        clicked = false;
+      }
     }).catch(() => {});   // cancelled by a newer play or rest: ignore
   }
 
-  function rest(){
+  function rest(ms = anim.returnMs){
     const froms = parts.map(currentTransform);
     stopRunning();
     parts.forEach((el, i) => {
       if(froms[i] === "none") return;
       running.push(el.animate(
         [{ transform: froms[i] }, { transform: "none" }],
-        { duration: anim.returnMs, easing: anim.ease }
+        { duration: ms, easing: anim.ease }
       ));
     });
   }
@@ -797,7 +802,8 @@ function setupIconHover(svg, button, anim){
     hovering = false;
     if(committed && isPlaying()) return;   // clicked: let it finish, it eases back by itself
     committed = false;
-    rest();
+    rest(returnTime());
+    clicked = false;
   }
 
   button.addEventListener("mouseenter", () => {
@@ -808,6 +814,7 @@ function setupIconHover(svg, button, anim){
   button.addEventListener("blur", leave);
   button.addEventListener("click", () => {
     if(!hovering) play();            // touch tap: no hover happened, so play it once
+    clicked = true;                  // the eventual way back uses clickReturnMs
     committed = isPlaying();         // clicked mid-animation: keep going even if the pointer leaves
   });
 }
