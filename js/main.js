@@ -611,7 +611,7 @@ const CONTACT_DOTS = {
   firstMs: 300,      // when the first dot starts to pop back in (keep at least shrinkMs)
   staggerMs: 240,    // delay between dots
   popMs: 480,        // time each dot takes to pop in
-  peak: 1            // how big the pop overshoots (1 = no pop)
+  peak: 1.1            // how big the pop overshoots (1 = no pop)
 };
 
 // Fast rise to the peak, then settle back to 1.
@@ -648,7 +648,7 @@ const ICON_ANIMATIONS = {
     hold: true,
     stepMs: 600,                         // duration of each move
     returnMs: 350,                       // way back to the resting bars on mouse-out
-    clickReturnMs: 600,                  // way back after the button was clicked (longer)
+    clickReturnMs: 800,                  // way back after the button was clicked (longer)
     ease: "cubic-bezier(.65,0,.35,1)",   // each move accelerates and settles
     sequence: ["m", "r", "l", "m"],      // middle, right, left, back to middle
     states: {
