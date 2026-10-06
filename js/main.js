@@ -662,7 +662,7 @@ const ICON_ANIMATIONS = {
   },
   about: {
     motion: (id, t) => id === "head" ? headSwing(t) : null,   // only the head moves
-    durationMs: 1800,
+    durationMs: 1700,
     samples: 60,
     returnMs: 300,                          // way back on mouse-out
     ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
