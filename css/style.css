@@ -86,28 +86,35 @@ header{
 #nav-mark{ opacity:1; transform:none; transition:none; }
 
 #site-nav{
+  --nav-h:38px;         /* button height (was 32) */
+  --nav-pad:5px;        /* space around and between the buttons (was 4) */
+  --nav-x:17px;         /* horizontal padding inside a button (was 14) */
+  --nav-gap:10px;       /* space between icon and label (was 8) */
+  --nav-font:15.5px;    /* label size (was 13) */
+  --nav-icon:16px;      /* keep at 16 so the icons stay crisp */
+  --nav-r:7px;          /* button corner radius; the box adds the padding to it */
   --nav-time:.55s;
-  --nav-ease:cubic-bezier(.3,1.25,.4,1);   /* slight spring; use .65,0,.35,1 for no overshoot */ 
+  --nav-ease:cubic-bezier(.3,1.25,.4,1);   /* slight spring; use .65,0,.35,1 for no overshoot */
   --nav-hover-bg:#ececec;
   --nav-hover-time:.4s;
   --nav-hover-ease:cubic-bezier(.22,1,.36,1);   /* fast start, soft landing, no overshoot */
   position:fixed;
   top:14px; right:14px;
   z-index:51;
-  padding:4px;
+  padding:var(--nav-pad);
   background:#ececec;
-  border-radius:10px;
+  border-radius:calc(var(--nav-r) + var(--nav-pad));
   isolation:isolate;
 }
-#site-nav ul{ display:flex; gap:4px; list-style:none; margin:0; padding:0; }
+#site-nav ul{ display:flex; gap:var(--nav-pad); list-style:none; margin:0; padding:0; }
 
 /* gray hover pill: follows the cursor, positioned by JS */
 #nav-hover{
   position:absolute;
-  top:4px; left:0;
-  width:0; height:32px;
+  top:var(--nav-pad); left:0;
+  width:0; height:var(--nav-h);
   background:var(--nav-hover-bg);
-  border-radius:6px;
+  border-radius:var(--nav-r);
   z-index:1;
   opacity:0;
   pointer-events:none;
@@ -120,10 +127,10 @@ header{
 /* dark selected pill: sits above the hover pill */
 #nav-pill{
   position:absolute;
-  top:4px; left:0;
-  width:0; height:32px;
+  top:var(--nav-pad); left:0;
+  width:0; height:var(--nav-h);
   background:var(--ink);
-  border-radius:6px;
+  border-radius:var(--nav-r);
   z-index:2;
   pointer-events:none;
   transition:transform var(--nav-time) var(--nav-ease), width var(--nav-time) var(--nav-ease);
@@ -133,14 +140,14 @@ header{
   position:relative;
   display:flex;
   align-items:center;
-  gap:8px;
-  height:32px;
-  padding:0 14px;
+  gap:var(--nav-gap);
+  height:var(--nav-h);
+  padding:0 var(--nav-x);
   border:none;
   background:none;
   color:var(--ink);
   font-family:inherit;
-  font-size:13px;
+  font-size:var(--nav-font);
   font-weight:700;
   cursor:pointer;
   transition:color .3s ease;
@@ -150,7 +157,7 @@ header{
   content:"";
   position:absolute; inset:0;
   background:#fff;
-  border-radius:6px;
+  border-radius:var(--nav-r);
   z-index:0;
   transition:background .15s ease;
 }
@@ -165,7 +172,7 @@ header{
 }
 
 /* icons */
-.nav-link .nav-icon{ width:16px; height:16px; flex:none; display:block; }
+.nav-link .nav-icon{ width:var(--nav-icon); height:var(--nav-icon); flex:none; display:block; }
 .nav-link span.nav-icon{ background:currentColor; opacity:.3; transition:opacity .3s ease; }   /* placeholder */
 .nav-link.active span.nav-icon{ opacity:1; }
 img.nav-icon[data-icon]{ transition:filter .3s ease; }
@@ -513,7 +520,13 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 
 @media (max-width:720px){
   header{ padding:14px 20px; }
-  #site-nav{ top:9px; right:20px; }
-  .nav-link{ font-size:12px; padding:0 11px; height:30px; }
-  #nav-pill, #nav-hover{ height:30px; }
+  #site-nav{
+    top:9px; right:20px;
+    --nav-h:34px;
+    --nav-pad:4px;
+    --nav-x:12px;
+    --nav-gap:8px;
+    --nav-font:13px;
+    --nav-r:6px;
+  }
 }

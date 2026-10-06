@@ -606,12 +606,12 @@ function headSwing(t){
 // Contact dots: shrink away on hover, then pop back in one by one.
 const CONTACT_DOTS = {
   order: ["dot_left", "dot_mid", "dot_right"],
-  totalMs: 1400,     // whole animation
-  shrinkMs: 140,     // dots shrink away when hover starts
-  firstMs: 260,      // when the first dot starts to appear (keep at least shrinkMs)
-  staggerMs: 280,    // delay between dots: bigger = slower, more deliberate
-  popMs: 520,        // time each dot takes to appear
-  peak: 1.5          // how big the pop overshoots (1 = no pop)
+  totalMs: 1300,     // whole animation
+  shrinkMs: 160,     // dots pop out when hover starts
+  firstMs: 300,      // when the first dot starts to pop back in (keep at least shrinkMs)
+  staggerMs: 240,    // delay between dots
+  popMs: 480,        // time each dot takes to pop in
+  peak: 1.35         // how big the pop overshoots (1 = no pop)
 };
 
 // Fast rise to the peak, then settle back to 1.
@@ -645,6 +645,7 @@ function dotPop(id, t){
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
   work: {
+    hold: true,
     stepMs: 600,                         // duration of each move
     returnMs: 350,                       // way back to the resting bars on mouse-out
     ease: "cubic-bezier(.65,0,.35,1)",    // each move accelerates and settles
@@ -667,7 +668,7 @@ const ICON_ANIMATIONS = {
     durationMs: CONTACT_DOTS.totalMs,
     samples: 70,
     returnMs: 300,
-    ease: "cubic-bezier(.34,1.56,.64,1)"   // dots pop back with a little overshoot on mouse-out
+    ease: "cubic-bezier(.25,1,.5,1)"
   }
 };
 
@@ -700,13 +701,16 @@ function boxTransform(el, box){
 }
 
 // Turns a motion result ({dx, dy} and/or {scale}) into a CSS transform.
-function motionTransform(m){
-  const parts = [];
+// Scaling happens around `center`, so a part grows and shrinks in place.
+function motionTransform(m, center){
+  const list = [];
   if(m.dx !== undefined || m.dy !== undefined){
-    parts.push(`translate(${(m.dx || 0).toFixed(3)}px, ${(m.dy || 0).toFixed(3)}px)`);
+    list.push(`translate(${(m.dx || 0).toFixed(3)}px, ${(m.dy || 0).toFixed(3)}px)`);
   }
-  if(m.scale !== undefined) parts.push(`scale(${m.scale.toFixed(4)})`);
-  return parts.length ? parts.join(" ") : "none";
+  if(m.scale !== undefined){
+    list.push(`translate(${center.x}px, ${center.y}px) scale(${m.scale.toFixed(4)}) translate(${-center.x}px, ${-center.y}px)`);
+  }
+  return list.length ? list.join(" ") : "none";
 }
 
 function setupIconHover(svg, button, anim){
@@ -714,21 +718,27 @@ function setupIconHover(svg, button, anim){
 
   const parts = Array.from(svg.querySelectorAll("[id]"));
   let running = [];
+  let hovering = false;     // pointer or keyboard focus is on the button
+  let committed = false;    // button was clicked mid-animation: let it finish
 
   const currentTransform = el => getComputedStyle(el).transform;
+  const isPlaying = () => running.some(a => a.playState === "running");
   function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
 
   // For icons with a `motion` function: sample the path as many small steps.
-  // motion(id, t) returns {dx, dy} for t from 0 to 1, or null if that part stays still.
   function motionFrames(el, from){
     if(!anim.motion || !anim.motion(el.id, 0.5)) return null;
     const N = anim.samples || 60;
+    let center = { x: 0, y: 0 };
+    try{
+      const b = el.getBBox();
+      center = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    }catch(err){}
     const frames = [{ transform: from, offset: 0, easing: "linear" }];
     for(let k = 1; k <= N; k++){
       const t = k / N;
-      const m = anim.motion(el.id, t);
       frames.push({
-        transform: motionTransform(m),
+        transform: motionTransform(anim.motion(el.id, t), center),
         offset: t,
         easing: "linear"
       });
@@ -739,17 +749,19 @@ function setupIconHover(svg, button, anim){
   function play(){
     const froms = parts.map(currentTransform);
     stopRunning();
+    committed = false;
+    // Icons that end somewhere other than rest (Work) hold their last state while hovered.
+    // Icons that end at rest are released when finished, so they are drawn exactly as at rest.
+    const fill = anim.hold ? "forwards" : "none";
     const weights = anim.weights || (anim.sequence ? anim.sequence.map(() => 1) : []);
     const total = weights.reduce((a, b) => a + b, 0);
 
     parts.forEach((el, i) => {
-      // motion-function icons (About)
       if(anim.motion){
         const frames = motionFrames(el, froms[i]);
-        if(frames) running.push(el.animate(frames, { duration: anim.durationMs, fill: "forwards" }));
+        if(frames) running.push(el.animate(frames, { duration: anim.durationMs, fill }));
         return;
       }
-      // state-sequence icons (Work)
       const frames = [{ transform: froms[i], offset: 0 }];
       let acc = 0;
       anim.sequence.forEach((name, s) => {
@@ -758,8 +770,14 @@ function setupIconHover(svg, button, anim){
         frames.push({ transform: box ? boxTransform(el, box) : "none", offset: acc / total });
       });
       frames.forEach(f => { f.easing = anim.ease; });
-      running.push(el.animate(frames, { duration: anim.stepMs * total, fill: "forwards" }));
+      running.push(el.animate(frames, { duration: anim.stepMs * total, fill }));
     });
+
+    // When it has played to its end: if the pointer already left, ease back to rest.
+    Promise.all(running.map(a => a.finished)).then(() => {
+      committed = false;
+      if(!hovering) rest();
+    }).catch(() => {});   // cancelled by a newer play or rest: ignore
   }
 
   function rest(){
@@ -774,12 +792,24 @@ function setupIconHover(svg, button, anim){
     });
   }
 
+  function enter(){ hovering = true; play(); }
+  function leave(){
+    hovering = false;
+    if(committed && isPlaying()) return;   // clicked: let it finish, it eases back by itself
+    committed = false;
+    rest();
+  }
+
   button.addEventListener("mouseenter", () => {
-    if(window.matchMedia("(hover: hover)").matches) play();
+    if(window.matchMedia("(hover: hover)").matches) enter();
   });
-  button.addEventListener("mouseleave", rest);
-  button.addEventListener("focus", () => { if(button.matches(":focus-visible")) play(); });
-  button.addEventListener("blur", rest);
+  button.addEventListener("mouseleave", leave);
+  button.addEventListener("focus", () => { if(button.matches(":focus-visible")) enter(); });
+  button.addEventListener("blur", leave);
+  button.addEventListener("click", () => {
+    if(!hovering) play();            // touch tap: no hover happened, so play it once
+    committed = isPlaying();         // clicked mid-animation: keep going even if the pointer leaves
+  });
 }
 
 document.querySelectorAll("img.nav-icon[data-icon]").forEach(async img => {
