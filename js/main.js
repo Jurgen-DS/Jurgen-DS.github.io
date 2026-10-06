@@ -607,9 +607,9 @@ function headSwing(t){
 const CONTACT_DOTS = {
   order: ["dot_left", "dot_mid", "dot_right"],
   shrinkMs: 200,     // dots pop out when hover starts
-  firstMs: 350,      // when the first dot starts to pop back in (keep at least shrinkMs)
-  staggerMs: 300,    // delay between dots
-  popMs: 500,        // time each dot takes to pop in
+  firstMs: 400,      // when the first dot starts to pop back in (keep at least shrinkMs)
+  staggerMs: 350,    // delay between dots
+  popMs: 550,        // time each dot takes to pop in
   peak: 1.05         // how big the pop overshoots (1 = no pop)
 };
 // whole animation: ends exactly when the last dot has finished popping in
@@ -662,7 +662,7 @@ const ICON_ANIMATIONS = {
   },
   about: {
     motion: (id, t) => id === "head" ? headSwing(t) : null,   // only the head moves
-    durationMs: 1500,
+    durationMs: 1800,
     samples: 60,
     returnMs: 300,                          // way back on mouse-out
     ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
