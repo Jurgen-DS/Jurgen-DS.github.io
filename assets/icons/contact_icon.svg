@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <mask id="contact_cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+    <rect width="64" height="64" style="fill:#fff"/>
+    <circle id="dot_left"  cx="16" cy="28" r="4" style="fill:#000"/>
+    <circle id="dot_mid"   cx="32" cy="28" r="4" style="fill:#000"/>
+    <circle id="dot_right" cx="48" cy="28" r="4" style="fill:#000"/>
+  </mask>
+  <g id="bubble" mask="url(#contact_cutout)">
+    <ellipse cx="32" cy="28" rx="32" ry="24"/>
+    <polygon points="4,60 20,52 12,44"/>
+  </g>
+</svg>

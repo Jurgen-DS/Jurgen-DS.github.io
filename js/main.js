@@ -570,7 +570,7 @@ function focusBoxes(focus, { size, gap, narrow, restInset }){
 // About head: swings on an arc around the neck and settles.
 const ABOUT_HEAD_ARC = {
   radius: 24,                       // head center to neck pivot, in units
-  swingDeg: 34,                     // angle of a swing with size 1
+  swingDeg: 30,                     // angle of a swing with size 1
   lobes: [0.9, 1, 0.8, 0.65, 0.35],      // size of each swing in order: left, right, left, right.
                                     // Add or remove numbers for more or fewer swings
   edgeEase: 1,                      // 1 = soft start and stop; lower = more even timing, more abrupt start
@@ -603,6 +603,45 @@ function headSwing(t){
   };
 }
 
+// Contact dots: shrink away on hover, then pop back in one by one.
+const CONTACT_DOTS = {
+  order: ["dot_left", "dot_mid", "dot_right"],
+  totalMs: 1400,     // whole animation
+  shrinkMs: 140,     // dots shrink away when hover starts
+  firstMs: 260,      // when the first dot starts to appear (keep at least shrinkMs)
+  staggerMs: 280,    // delay between dots: bigger = slower, more deliberate
+  popMs: 520,        // time each dot takes to appear
+  peak: 1.5          // how big the pop overshoots (1 = no pop)
+};
+
+// Fast rise to the peak, then settle back to 1.
+function popCurve(p, peak){
+  if(p < 0.6){
+    const q = p / 0.6;
+    return peak * (1 - Math.pow(1 - q, 3));
+  }
+  const q = (p - 0.6) / 0.4;
+  return peak + (1 - peak) * (1 - Math.cos(Math.PI * q)) / 2;
+}
+
+function dotPop(id, t){
+  const c = CONTACT_DOTS;
+  const i = c.order.indexOf(id);
+  if(i < 0) return null;
+  const ms = t * c.totalMs;
+  const start = c.firstMs + i * c.staggerMs;
+  let scale;
+  if(ms < c.shrinkMs){
+    const p = ms / c.shrinkMs;
+    scale = 1 - p * p;                              // quick ease-in shrink
+  } else if(ms < start){
+    scale = 0;                                      // waiting its turn
+  } else {
+    scale = popCurve(Math.min(1, (ms - start) / c.popMs), c.peak);
+  }
+  return { scale: Math.max(scale, 0.001) };         // never exactly 0, so it can blend back cleanly
+}
+
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
   work: {
@@ -622,6 +661,13 @@ const ICON_ANIMATIONS = {
     samples: 60,
     returnMs: 300,                          // way back on mouse-out
     ease: "cubic-bezier(.37,0,.63,1)"       // easing for that return
+  },
+  contact: {
+    motion: (id, t) => dotPop(id, t),
+    durationMs: CONTACT_DOTS.totalMs,
+    samples: 70,
+    returnMs: 300,
+    ease: "cubic-bezier(.34,1.56,.64,1)"   // dots pop back with a little overshoot on mouse-out
   }
 };
 
@@ -653,6 +699,16 @@ function boxTransform(el, box){
   return `translate(${box.x - b.x * sx}px, ${box.y - b.y * sy}px) scale(${sx}, ${sy})`;
 }
 
+// Turns a motion result ({dx, dy} and/or {scale}) into a CSS transform.
+function motionTransform(m){
+  const parts = [];
+  if(m.dx !== undefined || m.dy !== undefined){
+    parts.push(`translate(${(m.dx || 0).toFixed(3)}px, ${(m.dy || 0).toFixed(3)}px)`);
+  }
+  if(m.scale !== undefined) parts.push(`scale(${m.scale.toFixed(4)})`);
+  return parts.length ? parts.join(" ") : "none";
+}
+
 function setupIconHover(svg, button, anim){
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -672,7 +728,7 @@ function setupIconHover(svg, button, anim){
       const t = k / N;
       const m = anim.motion(el.id, t);
       frames.push({
-        transform: `translate(${m.dx.toFixed(3)}px, ${m.dy.toFixed(3)}px)`,
+        transform: motionTransform(m),
         offset: t,
         easing: "linear"
       });
