@@ -645,6 +645,61 @@ function dotPop(id, t){
   return { scale: Math.max(scale, 0.001) };         // never exactly 0, so it can blend back cleanly
 }
 
+// Home icon: the core shrinks into a pupil, the iris ring tightens around it,
+// the pupil looks around, and the outer ring turns into dashes.
+const HOME_EYE = {
+  totalMs: 1500,        // whole animation
+  formMs: 450,          // core shrinks and iris tightens
+  coreScale: 12 / 3 / 4 / 1,   // placeholder, replaced below
+  irisScale: 14 / 18,   // iris ring radius 18 -> 14
+  irisStroke: 4,        // iris line stays 4 units wide while it scales
+  dashStartMs: 200,     // outer ring starts turning into dashes
+  dashMs: 600,          // how long that takes
+  glanceMs: 120,        // how fast the eye jumps from one look to the next
+  gaze: [               // where it looks, and when it jumps there (2 units = 1px at 32px)
+    { at: 560,  x: -4.5, y: 0 },
+    { at: 900,  x:  4.5, y: -2 },
+    { at: 1240, x: 0,    y: 0 }
+  ]
+};
+HOME_EYE.coreScale = 4 / 12;   // core radius 12 -> pupil radius 4
+
+const easeInOut = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const clamp01 = v => Math.max(0, Math.min(1, v));
+
+// Where the pupil is looking at a given time: quick jumps with a pause on each look.
+function gazeAt(ms){
+  let prev = { x: 0, y: 0 };
+  for(const step of HOME_EYE.gaze){
+    if(ms <= step.at) return prev;
+    const p = (ms - step.at) / HOME_EYE.glanceMs;
+    if(p < 1){
+      const e = easeInOut(p);
+      return { x: prev.x + (step.x - prev.x) * e, y: prev.y + (step.y - prev.y) * e };
+    }
+    prev = step;
+  }
+  return prev;
+}
+
+function eyeMotion(id, t){
+  const h = HOME_EYE;
+  const ms = t * h.totalMs;
+  const form = easeInOut(clamp01(ms / h.formMs));
+  const dash = easeInOut(clamp01((ms - h.dashStartMs) / h.dashMs));
+  const gaze = gazeAt(ms);
+  if(id === "core"){
+    return { dx: gaze.x, dy: gaze.y, scale: 1 + (h.coreScale - 1) * form };
+  }
+  if(id === "iris"){
+    const s = 1 + (h.irisScale - 1) * form;
+    return { dx: gaze.x, dy: gaze.y, scale: s, strokeWidth: h.irisStroke / s };  // keeps the line width constant
+  }
+  if(id === "ring_outer") return { opacity: 1 - dash };
+  if(id === "ring_dash")  return { opacity: dash };
+  return null;
+}
+
 // Per icon: a sequence of states, and per state a target box for each element id.
 const ICON_ANIMATIONS = {
   work: {
@@ -673,6 +728,14 @@ const ICON_ANIMATIONS = {
     samples: 70,
     returnMs: 300,
     ease: "cubic-bezier(.25,1,.5,1)"
+  },
+  home: {
+    motion: eyeMotion,
+    hold: true,                         // stays an eye while hovered
+    durationMs: HOME_EYE.totalMs,
+    samples: 120,
+    returnMs: 450,
+    ease: "cubic-bezier(.65,0,.35,1)"
   }
 };
 
@@ -717,6 +780,17 @@ function motionTransform(m, center){
   return list.length ? list.join(" ") : "none";
 }
 
+// A motion result as keyframe properties: transform, opacity and/or stroke width.
+function motionProps(m, center){
+  const p = {};
+  if(m.dx !== undefined || m.dy !== undefined || m.scale !== undefined){
+    p.transform = motionTransform(m, center);
+  }
+  if(m.opacity !== undefined) p.opacity = m.opacity.toFixed(4);
+  if(m.strokeWidth !== undefined) p.strokeWidth = `${m.strokeWidth.toFixed(4)}px`;
+  return p;
+}
+
 function setupIconHover(svg, button, anim){
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -726,34 +800,37 @@ function setupIconHover(svg, button, anim){
   let committed = false;    // button was clicked mid-animation: let it finish
   let clicked = false;      // button was clicked since the hover began
 
-  const currentTransform = el => getComputedStyle(el).transform;
   const isPlaying = () => running.some(a => a.playState === "running");
   const returnTime = () => (clicked && anim.clickReturnMs) || anim.returnMs;
   function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
 
-  // For icons with a `motion` function: sample the path as many small steps.
-  function motionFrames(el, from){
-    if(!anim.motion || !anim.motion(el.id, 0.5)) return null;
-    const N = anim.samples || 60;
-    let center = { x: 0, y: 0 };
+  function centerOf(el){
     try{
       const b = el.getBBox();
-      center = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
-    }catch(err){}
-    const frames = [{ transform: from, offset: 0, easing: "linear" }];
-    for(let k = 1; k <= N; k++){
-      const t = k / N;
-      frames.push({
-        transform: motionTransform(anim.motion(el.id, t), center),
-        offset: t,
-        easing: "linear"
-      });
+      return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    }catch(err){
+      return { x: 0, y: 0 };
     }
-    return frames;
+  }
+
+  // The resting values of the properties a part animates (null: this part stays still).
+  function restProps(el, center){
+    if(!anim.motion) return { transform: "none" };
+    const m = anim.motion(el.id, 0);
+    return m ? motionProps(m, center) : null;
+  }
+  // The live values of those same properties right now.
+  function liveProps(el, props){
+    const cs = getComputedStyle(el);
+    const out = {};
+    Object.keys(props).forEach(k => { out[k] = cs[k]; });
+    return out;
   }
 
   function play(){
-    const froms = parts.map(currentTransform);
+    const centers = parts.map(centerOf);
+    const rests = parts.map((el, i) => restProps(el, centers[i]));
+    const froms = parts.map((el, i) => rests[i] ? liveProps(el, rests[i]) : null);
     stopRunning();
     committed = false;
     clicked = false;
@@ -762,12 +839,20 @@ function setupIconHover(svg, button, anim){
     const total = weights.reduce((a, b) => a + b, 0);
 
     parts.forEach((el, i) => {
+      if(!rests[i]) return;
+      // motion-function icons (About, Contact, Home)
       if(anim.motion){
-        const frames = motionFrames(el, froms[i]);
-        if(frames) running.push(el.animate(frames, { duration: anim.durationMs, fill }));
+        const N = anim.samples || 60;
+        const frames = [{ ...froms[i], offset: 0, easing: "linear" }];
+        for(let k = 1; k <= N; k++){
+          const t = k / N;
+          frames.push({ ...motionProps(anim.motion(el.id, t), centers[i]), offset: t, easing: "linear" });
+        }
+        running.push(el.animate(frames, { duration: anim.durationMs, fill }));
         return;
       }
-      const frames = [{ transform: froms[i], offset: 0 }];
+      // state-sequence icons (Work)
+      const frames = [{ ...froms[i], offset: 0 }];
       let acc = 0;
       anim.sequence.forEach((name, s) => {
         acc += weights[s];
@@ -789,14 +874,13 @@ function setupIconHover(svg, button, anim){
   }
 
   function rest(ms = anim.returnMs){
-    const froms = parts.map(currentTransform);
+    const centers = parts.map(centerOf);
+    const rests = parts.map((el, i) => restProps(el, centers[i]));
+    const froms = parts.map((el, i) => rests[i] ? liveProps(el, rests[i]) : null);
     stopRunning();
     parts.forEach((el, i) => {
-      if(froms[i] === "none") return;
-      running.push(el.animate(
-        [{ transform: froms[i] }, { transform: "none" }],
-        { duration: ms, easing: anim.ease }
-      ));
+      if(!rests[i]) return;
+      running.push(el.animate([froms[i], rests[i]], { duration: ms, easing: anim.ease }));
     });
   }
 

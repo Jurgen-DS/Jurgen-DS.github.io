@@ -78,12 +78,13 @@ header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:16px 32px;
+  padding:22px 32px;
   mix-blend-mode:difference;   /* logo only, the nav lives outside the header */
   pointer-events:none;
 }
-#logo-btn{ background:none; border:none; padding:0; cursor:pointer; width:28px; pointer-events:auto; }
-#nav-mark{ opacity:1; transform:none; transition:none; }
+#logo-btn{ background:none; border:none; padding:0; cursor:pointer; width:32px; height:32px; color:#fff; pointer-events:auto; }
+.logo-icon{ width:32px; height:32px; display:block; }
+img.logo-icon{ filter:invert(1); }   /* static fallback is white, like the inlined version (the header blends) */
 
 #site-nav{
   --nav-h:38px;         /* button height (was 32) */
