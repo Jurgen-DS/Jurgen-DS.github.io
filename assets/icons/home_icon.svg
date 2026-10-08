@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <circle id="core" cx="32" cy="32" r="12"/>
-  <circle id="iris" cx="32" cy="32" r="18" stroke-width="4" style="fill:none;stroke:currentColor"/>
-  <circle cx="32" cy="32" r="25" stroke-width="2" style="fill:none;stroke:currentColor"/>
-  <circle id="ring_outer" cx="32" cy="32" r="31" stroke-width="2" style="fill:none;stroke:currentColor"/>
-  <circle id="ring_dash" cx="32" cy="32" r="31" stroke-width="2" opacity="0"
-          stroke-dasharray="4.0579 4.0579" stroke-dashoffset="2.0289"
-          style="fill:none;stroke:currentColor"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10.16 10.16 66 66" fill="currentColor">
+  <mask id="eye_glint_btn" maskUnits="userSpaceOnUse" x="0" y="0" width="86.32" height="86.32">
+    <rect width="86.32" height="86.32" style="fill:#fff"/>
+    <circle id="glint" cx="46.73" cy="39.6" r="2.74" style="fill:#000"/>
+  </mask>
+  <circle id="shell" cx="43.16" cy="43.16" r="25.41" stroke-width="5" style="fill:none;stroke:currentColor"/>
+  <circle id="shell_gap" cx="43.16" cy="43.16" r="25.41" stroke-width="5" opacity="0"
+          stroke-dasharray="159.6457 0.01" style="fill:none;stroke:currentColor"/>
+  <circle id="iris" cx="43.16" cy="43.16" r="12.33" stroke-width="5" style="fill:none;stroke:currentColor"/>
+  <g id="pupil" mask="url(#eye_glint_btn)">
+    <circle id="core" cx="43.16" cy="43.16" r="5.6"/>
+  </g>
+  <g id="arrow" opacity="0">
+    <polygon points="43.16,17.75 34.16,10.55 34.16,24.95"
+             style="fill:currentColor;stroke:currentColor;stroke-width:2.4;stroke-linejoin:round"/>
+  </g>
 </svg>

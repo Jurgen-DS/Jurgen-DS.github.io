@@ -59,7 +59,9 @@ html.reveal-failed .reveal-word.pending{
 .mark.visible{ opacity:1; transform:scale(1); }
 .mark svg{ width:100%; height:auto; display:block; }
 
-#intro-mark{ width:120px; margin-bottom:28px; }
+#intro-mark{ width:150px; margin-bottom:28px; }
+#intro-mark img{ width:100%; height:auto; display:block; filter:invert(1); }   /* white eye until the SVG is inlined */
+#intro-mark svg *{ transform-box:view-box; transform-origin:0 0; }
 
 #intro h1{ font-size:clamp(28px,5vw,52px); font-weight:700; margin:0; letter-spacing:0.01em; }
 #intro p{ font-size:14px; color:#9a9a9a; margin:14px 0 0; letter-spacing:0.04em; }
@@ -77,14 +79,37 @@ header{
   z-index:50;
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  padding:22px 32px;
-  mix-blend-mode:difference;   /* logo only, the nav lives outside the header */
+  align-items:flex-start;
+  padding:14px;
   pointer-events:none;
 }
-#logo-btn{ background:none; border:none; padding:0; cursor:pointer; width:32px; height:32px; color:#fff; pointer-events:auto; }
-.logo-icon{ width:32px; height:32px; display:block; }
-img.logo-icon{ filter:invert(1); }   /* static fallback is white, like the inlined version (the header blends) */
+
+/* home button: same look as the nav (gray box, white face) */
+#logo-btn{
+  --logo-face:38px;
+  --logo-pad:5px;
+  --logo-r:7px;
+  --logo-icon:30px;
+  display:block;
+  padding:var(--logo-pad);
+  border:none;
+  background:#ececec;
+  border-radius:calc(var(--logo-r) + var(--logo-pad));
+  color:var(--ink);
+  cursor:pointer;
+  pointer-events:auto;
+}
+.logo-face{
+  display:grid;
+  place-items:center;
+  width:var(--logo-face);
+  height:var(--logo-face);
+  background:#fff;
+  border-radius:var(--logo-r);
+  transition:background .15s ease;
+}
+#logo-btn:hover .logo-face{ background:#ececec; }
+.logo-icon{ width:var(--logo-icon); height:var(--logo-icon); display:block; overflow:visible; }
 
 #site-nav{
   --nav-h:38px;         /* button height (was 32) */
@@ -527,7 +552,8 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 #lightbox-next{ right:24px; top:50%; transform:translateY(-50%); font-size:36px; }
 
 @media (max-width:720px){
-  header{ padding:14px 20px; }
+  header{ padding:9px 20px; }
+  #logo-btn{ --logo-face:34px; --logo-pad:4px; --logo-r:6px; --logo-icon:27px; }
   #site-nav{
     top:9px; right:20px;
     --nav-h:34px;

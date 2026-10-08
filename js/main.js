@@ -225,20 +225,41 @@ const introH1 = intro.querySelector("h1");
 const introP = intro.querySelector("p");
 const workPage = document.getElementById("page-work");
 
-window.addEventListener("load", () => {
+let introEyeSvg = null;        // the eye once loaded and inlined (null: static fallback)
+let introLeaveTimer = null;
+let introCleanupTimer = null;
+
+function startIntroSequence(){
+  clearTimeout(introLeaveTimer);
   requestAnimationFrame(() => introMark.classList.add("visible"));
   revealGroup([introH1, introP]);
+
+  let holdMs = INTRO_HOLD_MS;   // fallback if the eye could not be loaded
+  if(introEyeSvg){
+    runEyeIntro(introEyeSvg);
+    holdMs = EYE_INTRO.totalMs / EYE_INTRO.speed + EYE_INTRO.holdAfterMs;
+  }
+  introLeaveTimer = setTimeout(leaveIntro, holdMs);
+}
+
+window.addEventListener("load", async () => {
+  const eyeImg = document.getElementById("intro-eye");
+  if(eyeImg) introEyeSvg = await inlineIcon(eyeImg);
+  startIntroSequence();
 });
 
 function leaveIntro(){
+  clearTimeout(introLeaveTimer);
   forceReveal(introH1);
   forceReveal(introP);
   intro.classList.add("leaving");
   startWorkReveal();
-  setTimeout(() => intro.style.display = "none", INTRO_LEAVE_MS);
+  introCleanupTimer = setTimeout(() => {
+    intro.style.display = "none";
+    stopEyeIntro();
+  }, INTRO_LEAVE_MS);
 }
 document.getElementById("skip-intro").addEventListener("click", leaveIntro);
-setTimeout(leaveIntro, INTRO_HOLD_MS);
 
 function replayIntro(){
   forceReveal(introH1);
@@ -247,6 +268,7 @@ function replayIntro(){
   workPage.scrollTo({ top: 0, behavior: "instant" });
   goToPage(0, "logo");
 
+  clearTimeout(introCleanupTimer);   // a replay during the slide-away must not get hidden by the old timer
   intro.style.transition = `transform ${INTRO_ENTER_MS}ms cubic-bezier(.65,0,.35,1)`;
   intro.style.display = "flex";
   void intro.offsetWidth;
@@ -255,10 +277,7 @@ function replayIntro(){
 
   introMark.classList.remove("visible");
   void introMark.offsetWidth;
-  requestAnimationFrame(() => introMark.classList.add("visible"));
-
-  revealGroup([introH1, introP]);
-  setTimeout(leaveIntro, INTRO_HOLD_MS);
+  startIntroSequence();
 }
 document.getElementById("logo-btn").addEventListener("click", replayIntro);
 
@@ -645,59 +664,200 @@ function dotPop(id, t){
   return { scale: Math.max(scale, 0.001) };         // never exactly 0, so it can blend back cleanly
 }
 
-// Home icon: the core shrinks into a pupil, the iris ring tightens around it,
-// the pupil looks around, and the outer ring turns into dashes.
-const HOME_EYE = {
-  totalMs: 1500,        // whole animation
-  formMs: 450,          // core shrinks and iris tightens
-  coreScale: 12 / 3 / 4 / 1,   // placeholder, replaced below
-  irisScale: 14 / 18,   // iris ring radius 18 -> 14
-  irisStroke: 4,        // iris line stays 4 units wide while it scales
-  dashStartMs: 200,     // outer ring starts turning into dashes
-  dashMs: 600,          // how long that takes
-  glanceMs: 120,        // how fast the eye jumps from one look to the next
-  gaze: [               // where it looks, and when it jumps there (2 units = 1px at 32px)
-    { at: 560,  x: -4.5, y: 0 },
-    { at: 900,  x:  4.5, y: -2 },
-    { at: 1240, x: 0,    y: 0 }
-  ]
-};
-HOME_EYE.coreScale = 4 / 12;   // core radius 12 -> pupil radius 4
+/* ---------- The eye (intro + home button) ---------- */
+const EYE_C = { x: 43.16, y: 43.16 };                   // center of the eye in both SVGs
+const EYE_R = { shell: 25.41, shellInner: 22.91, pupil: 5.6 };
+const RING_LEN = 2 * Math.PI * EYE_R.shell;
+const deg2rad = Math.PI / 180;
 
 const easeInOut = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const easeOutBack = p => { const c1 = 1.70158, c3 = c1 + 1, q = p - 1; return 1 + c3 * q * q * q + c1 * q * q; };
 const clamp01 = v => Math.max(0, Math.min(1, v));
 
-// Where the pupil is looking at a given time: quick jumps with a pause on each look.
-function gazeAt(ms){
-  let prev = { x: 0, y: 0 };
-  for(const step of HOME_EYE.gaze){
-    if(ms <= step.at) return prev;
-    const p = (ms - step.at) / HOME_EYE.glanceMs;
-    if(p < 1){
-      const e = easeInOut(p);
-      return { x: prev.x + (step.x - prev.x) * e, y: prev.y + (step.y - prev.y) * e };
-    }
-    prev = step;
+function centerOf(el){
+  try{
+    const b = el.getBBox();
+    return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+  }catch(err){
+    return { x: 0, y: 0 };
   }
-  return prev;
 }
 
-function eyeMotion(id, t){
-  const h = HOME_EYE;
-  const ms = t * h.totalMs;
-  const form = easeInOut(clamp01(ms / h.formMs));
-  const dash = easeInOut(clamp01((ms - h.dashStartMs) / h.dashMs));
-  const gaze = gazeAt(ms);
-  if(id === "core"){
-    return { dx: gaze.x, dy: gaze.y, scale: 1 + (h.coreScale - 1) * form };
+// Small, never-repeating-looking drift so the eye is never perfectly on target.
+const wobble = (ms, amp) => ({
+  x: amp * (Math.sin(ms * 0.011) + 0.6 * Math.sin(ms * 0.027 + 1.3)),
+  y: amp * (Math.cos(ms * 0.013 + 0.7) + 0.6 * Math.sin(ms * 0.031))
+});
+
+// Pre-simulates a pupil that follows a target the way an eye does:
+// a little late, a little overshooting, never exact. targetAt(ms) returns {x, y} in SVG units.
+function makeGazeTrack(totalMs, targetAt, { stiffness = 140, damping = 13, steps = 300 } = {}){
+  const dt = totalMs / steps;
+  const s = dt / 1000;
+  let x = 0, y = 0, vx = 0, vy = 0;
+  const table = [{ x, y }];
+  for(let i = 1; i <= steps; i++){
+    const tg = targetAt(i * dt);
+    vx += (stiffness * (tg.x - x) - damping * vx) * s;
+    vy += (stiffness * (tg.y - y) - damping * vy) * s;
+    x += vx * s;
+    y += vy * s;
+    table.push({ x, y });
   }
-  if(id === "iris"){
-    const s = 1 + (h.irisScale - 1) * form;
-    return { dx: gaze.x, dy: gaze.y, scale: s, strokeWidth: h.irisStroke / s };  // keeps the line width constant
+  return ms => {
+    const f = clamp01(ms / totalMs) * steps;
+    const i = Math.min(steps - 1, Math.floor(f));
+    const p = f - i;
+    return {
+      x: table[i].x + (table[i + 1].x - table[i].x) * p,
+      y: table[i].y + (table[i + 1].y - table[i].y) * p
+    };
+  };
+}
+
+/* --- Home button: an arrow appears on the ring, swoops around, the eye keeps an eye on it --- */
+const BTN_EYE = {
+  popMs: 280,           // arrow pops in and the ring opens
+  swoopStartMs: 240,
+  swoopMs: 1150,        // time for the arrow to travel around
+  startDeg: 57,         // where it appears and ends up, degrees clockwise from 12 o'clock
+  turns: 1,             // laps around the ring
+  gapDeg: 36,           // size of the break in the ring around the arrow
+  reach: 3.5,           // how far the pupil follows it (units)
+  restLook: 0.35,       // how much it keeps looking toward the arrow once it stops
+  settleMs: 450,
+  totalMs: 0
+};
+BTN_EYE.totalMs = BTN_EYE.swoopStartMs + BTN_EYE.swoopMs + BTN_EYE.settleMs;
+
+function arrowDeg(ms){
+  const b = BTN_EYE;
+  return b.startDeg + 360 * b.turns * easeInOut(clamp01((ms - b.swoopStartMs) / b.swoopMs));
+}
+
+const btnGaze = makeGazeTrack(BTN_EYE.totalMs, ms => {
+  const b = BTN_EYE;
+  const swoopEnd = b.swoopStartMs + b.swoopMs;
+  const appear = easeInOut(clamp01((ms - b.popMs * 0.4) / 200));       // starts looking once the arrow shows
+  const calm = easeInOut(clamp01((ms - swoopEnd) / b.settleMs));       // relaxes after it stops
+  const amp = b.reach * appear * (1 - calm * (1 - b.restLook));
+  const a = arrowDeg(ms) * deg2rad;
+  const w = wobble(ms, 0.25 * appear);
+  return { x: amp * Math.sin(a) + w.x, y: -amp * Math.cos(a) + w.y };
+});
+
+function buttonEyeMotion(id, t){
+  const b = BTN_EYE;
+  const ms = t * b.totalMs;
+  const open = easeInOut(clamp01(ms / b.popMs));
+  const psi = arrowDeg(ms);
+
+  if(id === "pupil" || id === "iris"){
+    const g = btnGaze(ms);
+    return { dx: g.x, dy: g.y };
   }
-  if(id === "ring_outer") return { opacity: 1 - dash };
-  if(id === "ring_dash")  return { opacity: dash };
+  if(id === "shell"){
+    return { opacity: ms <= 0 ? 1 : 0 };            // swapped for the gapped ring the moment the arrow shows up
+  }
+  if(id === "shell_gap"){
+    const gapUnits = Math.max(b.gapDeg * deg2rad * EYE_R.shell * open, 0.01);
+    const gapDegNow = gapUnits / EYE_R.shell / deg2rad;
+    return {
+      opacity: ms <= 0 ? 0 : 1,
+      dash: [RING_LEN - gapUnits, gapUnits],
+      rotate: (psi - 8) - 90 + gapDegNow / 2,       // keeps the gap just behind and ahead of the arrow
+      origin: EYE_C
+    };
+  }
+  if(id === "arrow"){
+    return {
+      opacity: clamp01(ms / (b.popMs * 0.5)),
+      scale: Math.max(easeOutBack(clamp01(ms / b.popMs)), 0.001),
+      rotate: psi,
+      origin: EYE_C
+    };
+  }
   return null;
+}
+
+/* --- Intro: a dot shrinks into the eye, dots circle it and fade out clockwise, the eye follows --- */
+const EYE_INTRO = {
+  speed: 1,              // 1 = as designed, 1.3 = faster overall
+  shrinkStartMs: 700,    // the dot starts shrinking (the logo fade-in takes ~600)
+  shrinkMs: 850,
+  glintStartMs: 1500,    // catchlight pops in
+  glintMs: 380,
+  dotsStartMs: 1300,     // dots start appearing, clockwise from the top
+  dotStaggerMs: 36,
+  dotPopMs: 260,
+  fadeStartMs: 2300,     // dots start fading, clockwise
+  fadeStaggerMs: 70,
+  fadeMs: 450,
+  dotEndOpacity: 0.28,   // how faded they end up
+  reach: 5,              // how far the pupil follows the fading dot (units)
+  settleMs: 500,         // eye returns to center at the end
+  holdAfterMs: 300,      // pause before the intro slides away
+  dots: 20,
+  totalMs: 0
+};
+EYE_INTRO.totalMs = EYE_INTRO.fadeStartMs + (EYE_INTRO.dots - 1) * EYE_INTRO.fadeStaggerMs
+                  + EYE_INTRO.fadeMs + EYE_INTRO.settleMs;
+const CORE_START = (EYE_R.shellInner + 0.4) / EYE_R.pupil;   // the starting dot slightly overlaps the shell: no hairline seam
+
+const introGaze = makeGazeTrack(EYE_INTRO.totalMs, ms => {
+  const e = EYE_INTRO;
+  const last = e.dots - 1;
+  const front = clamp01((ms - e.fadeStartMs) / (last * e.fadeStaggerMs)) * last;   // which dot is fading (fractional)
+  const lead = easeInOut(clamp01((ms - (e.fadeStartMs - 250)) / 250));              // looks just before the first fade
+  const tail = 1 - easeInOut(clamp01((ms - (e.fadeStartMs + last * e.fadeStaggerMs + 150)) / e.settleMs));
+  const amp = e.reach * lead * tail;
+  const a = front * 18 * deg2rad;
+  const w = wobble(ms, 0.3 * lead * tail);
+  return { x: amp * Math.sin(a) + w.x, y: -amp * Math.cos(a) + w.y };
+});
+
+function introMotion(id, t){
+  const e = EYE_INTRO;
+  const ms = t * e.totalMs;
+
+  if(id === "core"){                                  // the dot shrinks into the pupil
+    return { scale: CORE_START + (1 - CORE_START) * easeInOut(clamp01((ms - e.shrinkStartMs) / e.shrinkMs)) };
+  }
+  if(id === "pupil" || id === "iris"){
+    const g = introGaze(ms);
+    return { dx: g.x, dy: g.y };
+  }
+  if(id === "glint"){
+    return { scale: Math.max(easeOutBack(clamp01((ms - e.glintStartMs) / e.glintMs)), 0.001) };
+  }
+  const m = /^dot_(\d+)$/.exec(id);
+  if(m){
+    const k = +m[1];
+    const appear = clamp01((ms - (e.dotsStartMs + k * e.dotStaggerMs)) / e.dotPopMs);
+    const fade = easeInOut(clamp01((ms - (e.fadeStartMs + k * e.fadeStaggerMs)) / e.fadeMs));
+    return { scale: Math.max(easeOutBack(appear), 0.001), opacity: 1 - (1 - e.dotEndOpacity) * fade };
+  }
+  return null;
+}
+
+let introAnims = [];
+function stopEyeIntro(){ introAnims.forEach(a => a.cancel()); introAnims = []; }
+
+function runEyeIntro(svg){
+  stopEyeIntro();
+  const e = EYE_INTRO;
+  const duration = e.totalMs / e.speed;
+  const N = Math.round(duration / 16);                // about one sample per frame
+  svg.querySelectorAll("[id]").forEach(el => {
+    if(!introMotion(el.id, 0)) return;
+    const center = centerOf(el);
+    const frames = [];
+    for(let k = 0; k <= N; k++){
+      const t = k / N;
+      frames.push({ ...motionProps(introMotion(el.id, t), center), offset: t, easing: "linear" });
+    }
+    introAnims.push(el.animate(frames, { duration, fill: "both" }));   // holds the final look until the next replay
+  });
 }
 
 // Per icon: a sequence of states, and per state a target box for each element id.
@@ -730,10 +890,10 @@ const ICON_ANIMATIONS = {
     ease: "cubic-bezier(.25,1,.5,1)"
   },
   home: {
-    motion: eyeMotion,
-    hold: true,                         // stays an eye while hovered
-    durationMs: HOME_EYE.totalMs,
-    samples: 120,
+    motion: buttonEyeMotion,
+    hold: true,                         // arrow stays in the ring while hovered
+    durationMs: BTN_EYE.totalMs,
+    samples: 110,
     returnMs: 450,
     ease: "cubic-bezier(.65,0,.35,1)"
   }
@@ -767,12 +927,17 @@ function boxTransform(el, box){
   return `translate(${box.x - b.x * sx}px, ${box.y - b.y * sy}px) scale(${sx}, ${sy})`;
 }
 
-// Turns a motion result ({dx, dy} and/or {scale}) into a CSS transform.
-// Scaling happens around `center`, so a part grows and shrinks in place.
+// Turns a motion result into a CSS transform.
+// {dx, dy} moves it, {rotate, origin} turns it around `origin` (default: its own center),
+// {scale} scales it around its own center.
 function motionTransform(m, center){
   const list = [];
   if(m.dx !== undefined || m.dy !== undefined){
     list.push(`translate(${(m.dx || 0).toFixed(3)}px, ${(m.dy || 0).toFixed(3)}px)`);
+  }
+  if(m.rotate !== undefined){
+    const o = m.origin || center;
+    list.push(`translate(${o.x}px, ${o.y}px) rotate(${m.rotate.toFixed(3)}deg) translate(${-o.x}px, ${-o.y}px)`);
   }
   if(m.scale !== undefined){
     list.push(`translate(${center.x}px, ${center.y}px) scale(${m.scale.toFixed(4)}) translate(${-center.x}px, ${-center.y}px)`);
@@ -780,14 +945,15 @@ function motionTransform(m, center){
   return list.length ? list.join(" ") : "none";
 }
 
-// A motion result as keyframe properties: transform, opacity and/or stroke width.
+// A motion result as keyframe properties.
 function motionProps(m, center){
   const p = {};
-  if(m.dx !== undefined || m.dy !== undefined || m.scale !== undefined){
+  if(m.dx !== undefined || m.dy !== undefined || m.rotate !== undefined || m.scale !== undefined){
     p.transform = motionTransform(m, center);
   }
   if(m.opacity !== undefined) p.opacity = m.opacity.toFixed(4);
   if(m.strokeWidth !== undefined) p.strokeWidth = `${m.strokeWidth.toFixed(4)}px`;
+  if(m.dash !== undefined) p.strokeDasharray = `${m.dash[0].toFixed(3)}px ${m.dash[1].toFixed(3)}px`;
   return p;
 }
 

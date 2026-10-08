@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86.32 86.32" fill="currentColor">
+  <mask id="eye_glint_intro" maskUnits="userSpaceOnUse" x="0" y="0" width="86.32" height="86.32">
+    <rect width="86.32" height="86.32" style="fill:#fff"/>
+    <circle id="glint" cx="46.73" cy="39.6" r="2.74" style="fill:#000"/>
+  </mask>
+  <g id="dots">
+    <circle id="dot_0" cx="43.16" cy="9.87" r="2.62"/>
+    <circle id="dot_1" cx="53.45" cy="11.50" r="2.62"/>
+    <circle id="dot_2" cx="62.73" cy="16.23" r="2.62"/>
+    <circle id="dot_3" cx="70.09" cy="23.59" r="2.62"/>
+    <circle id="dot_4" cx="74.82" cy="32.87" r="2.62"/>
+    <circle id="dot_5" cx="76.45" cy="43.16" r="2.62"/>
+    <circle id="dot_6" cx="74.82" cy="53.45" r="2.62"/>
+    <circle id="dot_7" cx="70.09" cy="62.73" r="2.62"/>
+    <circle id="dot_8" cx="62.73" cy="70.09" r="2.62"/>
+    <circle id="dot_9" cx="53.45" cy="74.82" r="2.62"/>
+    <circle id="dot_10" cx="43.16" cy="76.45" r="2.62"/>
+    <circle id="dot_11" cx="32.87" cy="74.82" r="2.62"/>
+    <circle id="dot_12" cx="23.59" cy="70.09" r="2.62"/>
+    <circle id="dot_13" cx="16.23" cy="62.73" r="2.62"/>
+    <circle id="dot_14" cx="11.50" cy="53.45" r="2.62"/>
+    <circle id="dot_15" cx="9.87" cy="43.16" r="2.62"/>
+    <circle id="dot_16" cx="11.50" cy="32.87" r="2.62"/>
+    <circle id="dot_17" cx="16.23" cy="23.59" r="2.62"/>
+    <circle id="dot_18" cx="23.59" cy="16.23" r="2.62"/>
+    <circle id="dot_19" cx="32.87" cy="11.50" r="2.62"/>
+  </g>
+  <circle id="shell" cx="43.16" cy="43.16" r="25.41" stroke-width="5" style="fill:none;stroke:currentColor"/>
+  <circle id="iris" cx="43.16" cy="43.16" r="12.33" stroke-width="5" style="fill:none;stroke:currentColor"/>
+  <g id="pupil" mask="url(#eye_glint_intro)">
+    <circle id="core" cx="43.16" cy="43.16" r="5.6"/>
+  </g>
+</svg>
