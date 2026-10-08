@@ -89,7 +89,7 @@ header{
 #logo-btn{
   --logo-size:48px;
   --logo-border:5px;
-  --logo-r:12px;
+  --logo-r:50%x;
   --logo-icon:30px;
   --eye-bg:#fff;                    /* what shows through the catchlight */
   box-sizing:border-box;
@@ -552,7 +552,7 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 
 @media (max-width:720px){
   header{ padding:9px 20px; }
-  #logo-btn{ --logo-size:42px; --logo-border:4px; --logo-r:10px; --logo-icon:27px; }
+  #logo-btn{ --logo-size:42px; --logo-border:4px; --logo-r:50%; --logo-icon:27px; }
   #site-nav{
     top:9px; right:20px;
     --nav-h:34px;

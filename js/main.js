@@ -716,20 +716,63 @@ function makeGazeTrack(totalMs, targetAt, { stiffness = 240, damping = 21, steps
   };
 }
 
-/* --- Home icon: an arrow appears on the ring, swoops around, the eye keeps an eye on it --- */
+/* --- The highlight: the light stays (mostly) where it is, so inside the moving eye it slides the other way --- */
+const GLINT = {
+  base: { x: 2.8, y: -2.8 },   // where the spot sits when the eye looks straight ahead
+  follow: 0.6,                 // 0 = moves with the pupil, 1 = stays fixed on screen
+  maxR: 4.4                    // how far from the pupil's center it may slide (keeps it on the pupil)
+};
+function glintShift(g){
+  let px = GLINT.base.x - GLINT.follow * g.x;
+  let py = GLINT.base.y - GLINT.follow * g.y;
+  const len = Math.hypot(px, py);
+  if(len > GLINT.maxR){ px *= GLINT.maxR / len; py *= GLINT.maxR / len; }
+  return { x: px - GLINT.base.x, y: py - GLINT.base.y };
+}
+
+/* --- Looking around: a fixed, random-looking series of glances (same every time) --- */
+function makeIdleLooks(count, seed){
+  let s = seed;
+  const rnd = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const looks = [{ at: 0, x: 0.55, y: -0.3 }];
+  let at = 0, prev = looks[0];
+  for(let i = 1; i < count; i++){
+    at += 450 + rnd() * 650;                           // each look is held for 0.45 to 1.1 seconds
+    let x, y, tries = 0;
+    do {                                               // a new spot in the eye, clearly away from the last one
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd());
+      x = Math.cos(a) * r; y = Math.sin(a) * r;
+    } while(Math.hypot(x - prev.x, y - prev.y) < 0.7 && ++tries < 8);
+    prev = { at, x, y };
+    looks.push(prev);
+  }
+  return looks;
+}
+const HOME_IDLE = makeIdleLooks(60, 7);                // about 45 seconds worth; it holds its last look after that
+function idleLook(ms){
+  let look = HOME_IDLE[0];
+  for(const l of HOME_IDLE){ if(ms >= l.at) look = l; }
+  return look;
+}
+
+/* --- Home icon: an arrow appears on the ring and swoops around, then the eye keeps looking around --- */
 const HOME_ICON = {
   popMs: 200,           // arrow pops in and the ring opens
-  swoopStartMs: 160,
+  swoopStartMs: 260,    // a beat before it starts to swoop, so the eye can catch it
   swoopMs: 850,         // time for the arrow to travel around
   startDeg: 57,         // where it appears and ends up, degrees clockwise from 12 o'clock
   turns: 1,             // laps around the ring
   gapDeg: 36,           // size of the break in the ring around the arrow
-  reach: 6.5,           // how far the pupil and iris follow it (units)
-  restLook: 0.4,        // how much it keeps looking toward the arrow once it stops
-  settleMs: 300,
+  reach: 6.5,           // how far the pupil and iris travel (units)
+  lookDelayMs: 100,     // the eye notices the arrow this long after it starts to appear
+  lookInMs: 380,        // and takes this long to turn toward it (bigger = slower)
+  settleMs: 350,        // after the swoop the eye drifts off the arrow and starts looking around
+  idleMs: 20000,        // how long it keeps looking around while hovered
+  commitMs: 0,          // (computed) the part that plays out after a click
   totalMs: 0
 };
-HOME_ICON.totalMs = HOME_ICON.swoopStartMs + HOME_ICON.swoopMs + HOME_ICON.settleMs;
+HOME_ICON.commitMs = HOME_ICON.swoopStartMs + HOME_ICON.swoopMs + HOME_ICON.settleMs;
+HOME_ICON.totalMs = HOME_ICON.commitMs + HOME_ICON.idleMs;
 
 function arrowDeg(ms){
   const h = HOME_ICON;
@@ -739,13 +782,19 @@ function arrowDeg(ms){
 const homeGaze = makeGazeTrack(HOME_ICON.totalMs, ms => {
   const h = HOME_ICON;
   const swoopEnd = h.swoopStartMs + h.swoopMs;
-  const appear = easeInOut(clamp01((ms - h.popMs * 0.3) / 150));       // starts looking once the arrow shows
-  const calm = easeInOut(clamp01((ms - swoopEnd) / h.settleMs));       // relaxes after it stops
-  const amp = h.reach * appear * (1 - calm * (1 - h.restLook));
+  // 1. look at the arrow
+  const appear = easeInOut(clamp01((ms - h.lookDelayMs) / h.lookInMs));
   const a = arrowDeg(ms) * deg2rad;
+  const fx = h.reach * appear * Math.sin(a), fy = -h.reach * appear * Math.cos(a);
+  // 2. once it stops, drift into looking around
+  const calm = easeInOut(clamp01((ms - swoopEnd) / h.settleMs));
+  const idle = idleLook(ms - swoopEnd);
   const w = wobble(ms, 0.1 * appear);
-  return { x: amp * Math.sin(a) + w.x, y: -amp * Math.cos(a) + w.y };
-}, { stiffness: 260, damping: 22 });
+  return {
+    x: fx + (idle.x * h.reach - fx) * calm + w.x,
+    y: fy + (idle.y * h.reach - fy) * calm + w.y
+  };
+}, { stiffness: 260, damping: 22, steps: Math.round(HOME_ICON.totalMs / 6) });
 
 function homeIconMotion(id, t){
   const h = HOME_ICON;
@@ -756,6 +805,10 @@ function homeIconMotion(id, t){
   if(id === "gaze"){                                  // iris, pupil and catchlight move as one
     const g = homeGaze(ms);
     return { dx: g.x, dy: g.y };
+  }
+  if(id === "glint"){                                 // the highlight slides against the eye's movement
+    const s = glintShift(homeGaze(ms));
+    return { dx: s.x, dy: s.y };
   }
   if(id === "shell"){
     return { opacity: ms <= 0 ? 1 : 0 };              // swapped for the gapped ring the moment the arrow shows up
@@ -786,7 +839,7 @@ const INTRO_ICON = {
   speed: 1,              // 1 = as designed, 1.3 = faster overall
   shrinkStartMs: 600,    // the dot starts shrinking (the fade-in takes about 600)
   shrinkMs: 380,         // snappy
-  glintStartMs: 880,     // catchlight pops in
+  glintStartMs: 880,     // highlight pops in
   glintMs: 340,
   reach: 8,              // how far the pupil and iris travel (units)
   looks: [               // where it looks and when; x and y are directions (1 = full reach)
@@ -819,30 +872,46 @@ function introIconMotion(id, t){
     const g = introGaze(ms);
     return { dx: g.x, dy: g.y };
   }
-  if(id === "glint"){
-    return { scale: Math.max(easeOutBack(clamp01((ms - e.glintStartMs) / e.glintMs)), 0.001) };
+  if(id === "glint"){                                 // pops in, then slides against the eye's movement
+    const s = glintShift(introGaze(ms));
+    return { dx: s.x, dy: s.y, scale: Math.max(easeOutBack(clamp01((ms - e.glintStartMs) / e.glintMs)), 0.001) };
   }
   return null;
 }
 
-let introIconAnims = [];
-function stopIntroIcon(){ introIconAnims.forEach(a => a.cancel()); introIconAnims = []; }
+// The intro is driven frame by frame as plain SVG attributes (not CSS animations),
+// so the browser always redraws the shapes as sharp vectors, never as enlarged bitmaps.
+let introRaf = null;
+function stopIntroIcon(){ cancelAnimationFrame(introRaf); introRaf = null; }
+
+// SVG attributes want plain numbers: "translate(3, 2)" instead of "translate(3px, 2px)"
+const svgTransform = css => css.replace(/px/g, "").replace(/deg/g, "");
 
 function runIntroIcon(svg){
   stopIntroIcon();
   const e = INTRO_ICON;
   const duration = e.totalMs / e.speed;
-  const N = Math.round(duration / 16);                // about one sample per frame
+  const parts = [];
   svg.querySelectorAll("[id]").forEach(el => {
-    if(!introIconMotion(el.id, 0)) return;
-    const center = centerOf(el);
-    const frames = [];
-    for(let k = 0; k <= N; k++){
-      const t = k / N;
-      frames.push({ ...motionProps(introIconMotion(el.id, t), center), offset: t, easing: "linear" });
-    }
-    introIconAnims.push(el.animate(frames, { duration, fill: "both" }));   // holds the final look until the next replay
+    if(introIconMotion(el.id, 0)) parts.push({ el, center: centerOf(el) });
   });
+
+  function apply(t){
+    parts.forEach(({ el, center }) => {
+      const p = motionProps(introIconMotion(el.id, t), center);
+      if(p.transform) el.setAttribute("transform", svgTransform(p.transform));
+      if(p.opacity !== undefined) el.setAttribute("opacity", p.opacity);
+    });
+  }
+
+  const t0 = performance.now();
+  apply(0);                                           // the first look is set before the first paint
+  function frame(now){
+    const t = clamp01((now - t0) / duration);
+    apply(t);
+    if(t < 1) introRaf = requestAnimationFrame(frame);
+  }
+  introRaf = requestAnimationFrame(frame);
 }
 
 // Per icon: a sequence of states, and per state a target box for each element id.
@@ -876,9 +945,10 @@ const ICON_ANIMATIONS = {
   },
   home: {
     motion: homeIconMotion,
-    hold: true,                         // arrow stays in the ring while hovered
-    durationMs: HOME_ICON.totalMs,
-    samples: 80,
+    hold: true,                              // arrow stays in the ring while hovered
+    durationMs: HOME_ICON.totalMs,           // long on purpose: it keeps looking around while hovered
+    commitMs: HOME_ICON.commitMs,            // after a click, the swoop plays out and then it eases back
+    samples: Math.round(HOME_ICON.totalMs / 20),
     returnMs: 400,
     ease: "cubic-bezier(.65,0,.35,1)"
   }
@@ -948,20 +1018,22 @@ function setupIconHover(svg, button, anim){
   const parts = Array.from(svg.querySelectorAll("[id]"));
   let running = [];
   let hovering = false;     // pointer or keyboard focus is on the button
-  let committed = false;    // button was clicked mid-animation: let it finish
+  let committed = false;    // button was clicked: the main part of the animation plays out even if the pointer leaves
   let clicked = false;      // button was clicked since the hover began
+  let playStart = 0;
+  let commitTimer = null;
+
+  const weights = anim.weights || (anim.sequence ? anim.sequence.map(() => 1) : []);
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  // Length of the main part of the animation (icons that keep going while hovered set commitMs).
+  const mainMs = anim.commitMs || (anim.motion ? anim.durationMs : anim.stepMs * totalWeight);
 
   const isPlaying = () => running.some(a => a.playState === "running");
   const returnTime = () => (clicked && anim.clickReturnMs) || anim.returnMs;
-  function stopRunning(){ running.forEach(a => a.cancel()); running = []; }
-
-  function centerOf(el){
-    try{
-      const b = el.getBBox();
-      return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
-    }catch(err){
-      return { x: 0, y: 0 };
-    }
+  function stopRunning(){
+    clearTimeout(commitTimer);
+    running.forEach(a => a.cancel());
+    running = [];
   }
 
   // The resting values of the properties a part animates (null: this part stays still).
@@ -985,9 +1057,8 @@ function setupIconHover(svg, button, anim){
     stopRunning();
     committed = false;
     clicked = false;
+    playStart = performance.now();
     const fill = anim.hold ? "forwards" : "none";
-    const weights = anim.weights || (anim.sequence ? anim.sequence.map(() => 1) : []);
-    const total = weights.reduce((a, b) => a + b, 0);
 
     parts.forEach((el, i) => {
       if(!rests[i]) return;
@@ -1008,13 +1079,13 @@ function setupIconHover(svg, button, anim){
       anim.sequence.forEach((name, s) => {
         acc += weights[s];
         const box = anim.states[name][el.id];
-        frames.push({ transform: box ? boxTransform(el, box) : "none", offset: acc / total });
+        frames.push({ transform: box ? boxTransform(el, box) : "none", offset: acc / totalWeight });
       });
       frames.forEach(f => { f.easing = anim.ease; });
-      running.push(el.animate(frames, { duration: anim.stepMs * total, fill }));
+      running.push(el.animate(frames, { duration: anim.stepMs * totalWeight, fill }));
     });
 
-    // When it has played to its end: if the pointer already left, ease back to rest.
+    // When it has played to its very end: if the pointer already left, ease back to rest.
     Promise.all(running.map(a => a.finished)).then(() => {
       committed = false;
       if(!hovering){
@@ -1038,7 +1109,21 @@ function setupIconHover(svg, button, anim){
   function enter(){ hovering = true; play(); }
   function leave(){
     hovering = false;
-    if(committed && isPlaying()) return;   // clicked: let it finish, it eases back by itself
+    if(committed){
+      // clicked: let the main part finish, then ease back
+      const remaining = mainMs - (performance.now() - playStart);
+      if(remaining > 30){
+        clearTimeout(commitTimer);
+        commitTimer = setTimeout(() => {
+          committed = false;
+          if(!hovering){
+            rest(returnTime());
+            clicked = false;
+          }
+        }, remaining);
+        return;
+      }
+    }
     committed = false;
     rest(returnTime());
     clicked = false;
@@ -1053,7 +1138,7 @@ function setupIconHover(svg, button, anim){
   button.addEventListener("click", () => {
     if(!hovering) play();            // touch tap: no hover happened, so play it once
     clicked = true;                  // the eventual way back uses clickReturnMs
-    committed = isPlaying();         // clicked mid-animation: keep going even if the pointer leaves
+    committed = isPlaying();         // clicked mid-animation: the main part keeps going even if the pointer leaves
   });
 }
 
