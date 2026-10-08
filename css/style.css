@@ -59,7 +59,7 @@ html.reveal-failed .reveal-word.pending{
 .mark.visible{ opacity:1; transform:scale(1); }
 .mark svg{ width:100%; height:auto; display:block; }
 
-#intro-mark{ width:150px; margin-bottom:28px; }
+#intro-mark{ --eye-bg:#111; width:240px; margin-bottom:32px; }
 #intro-mark img{ width:100%; height:auto; display:block; filter:invert(1); }   /* white eye until the SVG is inlined */
 #intro-mark svg *{ transform-box:view-box; transform-origin:0 0; }
 
@@ -81,35 +81,34 @@ header{
   justify-content:space-between;
   align-items:flex-start;
   padding:14px;
+  mix-blend-mode:normal;   /* must not be "difference" anymore, or the button turns dark */
   pointer-events:none;
 }
 
-/* home button: same look as the nav (gray box, white face) */
+/* home button: white with a gray border, like the nav */
 #logo-btn{
-  --logo-face:38px;
-  --logo-pad:5px;
-  --logo-r:7px;
+  --logo-size:48px;
+  --logo-border:5px;
+  --logo-r:12px;
   --logo-icon:30px;
-  display:block;
-  padding:var(--logo-pad);
-  border:none;
-  background:#ececec;
-  border-radius:calc(var(--logo-r) + var(--logo-pad));
+  --eye-bg:#fff;                    /* what shows through the catchlight */
+  box-sizing:border-box;
+  display:grid;
+  place-items:center;
+  width:var(--logo-size);
+  height:var(--logo-size);
+  padding:0;
+  border:var(--logo-border) solid #ececec;
+  border-radius:var(--logo-r);
+  background:#fff;
   color:var(--ink);
   cursor:pointer;
   pointer-events:auto;
-}
-.logo-face{
-  display:grid;
-  place-items:center;
-  width:var(--logo-face);
-  height:var(--logo-face);
-  background:#fff;
-  border-radius:var(--logo-r);
   transition:background .15s ease;
 }
-#logo-btn:hover .logo-face{ background:#ececec; }
+#logo-btn:hover{ background:#ececec; --eye-bg:#ececec; }
 .logo-icon{ width:var(--logo-icon); height:var(--logo-icon); display:block; overflow:visible; }
+.logo-icon #glint{ transition:fill .15s ease; }
 
 #site-nav{
   --nav-h:38px;         /* button height (was 32) */
@@ -279,7 +278,7 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   pointer-events:none;
 }
 
-.dots{ position:absolute; top:20px; left:20px; display:flex; gap:6px; z-index:2; }
+.dots{ position:absolute; right:20px; bottom:42px; display:flex; gap:6px; z-index:2; }
 .dots span{ width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.4); }
 .dots span.active{ background:#fff; }
 
@@ -553,7 +552,7 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 
 @media (max-width:720px){
   header{ padding:9px 20px; }
-  #logo-btn{ --logo-face:34px; --logo-pad:4px; --logo-r:6px; --logo-icon:27px; }
+  #logo-btn{ --logo-size:42px; --logo-border:4px; --logo-r:10px; --logo-icon:27px; }
   #site-nav{
     top:9px; right:20px;
     --nav-h:34px;
