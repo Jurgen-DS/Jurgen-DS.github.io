@@ -691,71 +691,59 @@ const wobble = (ms, amp) => ({
 });
 
 // Pre-simulates a pupil that follows a target like an eye: a little late, a little overshooting.
-// targetAt(ms) returns {x, y} in SVG units. Higher stiffness = follows sooner.
-function makeGazeTrack(totalMs, targetAt, { stiffness = 240, damping = 21, steps = 320 } = {}){
+// targetAt(ms) returns {x, y} in SVG units. Higher stiffness = follows sooner, higher damping = less wobble.
+// The result is a function gaze(ms); gaze.slow(ms) is a smoothed version without the quick shakes.
+function makeGazeTrack(totalMs, targetAt, { stiffness = 240, damping = 21, steps = 320, slowMs = 180 } = {}){
   const dt = totalMs / steps;
   const s = dt / 1000;
-  let x = 0, y = 0, vx = 0, vy = 0;
+  const k = 1 - Math.exp(-dt / slowMs);
+  let x = 0, y = 0, vx = 0, vy = 0, sx = 0, sy = 0;
   const table = [{ x, y }];
+  const slowTable = [{ x: 0, y: 0 }];
   for(let i = 1; i <= steps; i++){
     const tg = targetAt(i * dt);
     vx += (stiffness * (tg.x - x) - damping * vx) * s;
     vy += (stiffness * (tg.y - y) - damping * vy) * s;
     x += vx * s;
     y += vy * s;
+    sx += (x - sx) * k;
+    sy += (y - sy) * k;
     table.push({ x, y });
+    slowTable.push({ x: sx, y: sy });
   }
-  return ms => {
+  const reader = tbl => ms => {
     const f = clamp01(ms / totalMs) * steps;
     const i = Math.min(steps - 1, Math.floor(f));
     const p = f - i;
     return {
-      x: table[i].x + (table[i + 1].x - table[i].x) * p,
-      y: table[i].y + (table[i + 1].y - table[i].y) * p
+      x: tbl[i].x + (tbl[i + 1].x - tbl[i].x) * p,
+      y: tbl[i].y + (tbl[i + 1].y - tbl[i].y) * p
     };
   };
+  const gaze = reader(table);
+  gaze.slow = reader(slowTable);
+  return gaze;
 }
 
-/* --- The highlight: the light stays (mostly) where it is, so inside the moving eye it slides the other way --- */
+/* --- The highlight: the light stays (mostly) where it is, so inside the moving eye it slides the other way.
+       It reacts to the slow, big movements; the quick shakes are carried along with the pupil. --- */
 const GLINT = {
   base: { x: 2.8, y: -2.8 },   // where the spot sits when the eye looks straight ahead
-  follow: 0.6,                 // 0 = moves with the pupil, 1 = stays fixed on screen
+  follow: 0.5,                 // 0 = moves with the pupil, 1 = stays fixed on screen
+  shake: 0.2,                  // how much of the quick shaking the spot reacts to (0 = none)
   maxR: 4.4                    // how far from the pupil's center it may slide (keeps it on the pupil)
 };
-function glintShift(g){
-  let px = GLINT.base.x - GLINT.follow * g.x;
-  let py = GLINT.base.y - GLINT.follow * g.y;
+function glintShift(g, slow){
+  const sx = slow.x + GLINT.shake * (g.x - slow.x);
+  const sy = slow.y + GLINT.shake * (g.y - slow.y);
+  let px = GLINT.base.x - GLINT.follow * sx;
+  let py = GLINT.base.y - GLINT.follow * sy;
   const len = Math.hypot(px, py);
   if(len > GLINT.maxR){ px *= GLINT.maxR / len; py *= GLINT.maxR / len; }
   return { x: px - GLINT.base.x, y: py - GLINT.base.y };
 }
 
-/* --- Looking around: a fixed, random-looking series of glances (same every time) --- */
-function makeIdleLooks(count, seed){
-  let s = seed;
-  const rnd = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
-  const looks = [{ at: 0, x: 0.55, y: -0.3 }];
-  let at = 0, prev = looks[0];
-  for(let i = 1; i < count; i++){
-    at += 450 + rnd() * 650;                           // each look is held for 0.45 to 1.1 seconds
-    let x, y, tries = 0;
-    do {                                               // a new spot in the eye, clearly away from the last one
-      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd());
-      x = Math.cos(a) * r; y = Math.sin(a) * r;
-    } while(Math.hypot(x - prev.x, y - prev.y) < 0.7 && ++tries < 8);
-    prev = { at, x, y };
-    looks.push(prev);
-  }
-  return looks;
-}
-const HOME_IDLE = makeIdleLooks(60, 7);                // about 45 seconds worth; it holds its last look after that
-function idleLook(ms){
-  let look = HOME_IDLE[0];
-  for(const l of HOME_IDLE){ if(ms >= l.at) look = l; }
-  return look;
-}
-
-/* --- Home icon: an arrow appears on the ring and swoops around, then the eye keeps looking around --- */
+/* --- Home icon: an arrow appears on the ring and swoops around, then the eye looks around --- */
 const HOME_ICON = {
   popMs: 200,           // arrow pops in and the ring opens
   swoopStartMs: 260,    // a beat before it starts to swoop, so the eye can catch it
@@ -768,11 +756,23 @@ const HOME_ICON = {
   lookInMs: 380,        // and takes this long to turn toward it (bigger = slower)
   settleMs: 350,        // after the swoop the eye drifts off the arrow and starts looking around
   idleMs: 20000,        // how long it keeps looking around while hovered
+  looks: [              // the directions it looks in, in order, over and over (1 = full reach)
+    { x: -1, y: 0 },    // left
+    { x:  1, y: 0 },    // right
+    { x:  0, y: 1 },    // down
+    { x:  0, y: -1 }    // up
+  ],
+  lookHoldMs: 900,      // how long each look is held
   commitMs: 0,          // (computed) the part that plays out after a click
   totalMs: 0
 };
 HOME_ICON.commitMs = HOME_ICON.swoopStartMs + HOME_ICON.swoopMs + HOME_ICON.settleMs;
 HOME_ICON.totalMs = HOME_ICON.commitMs + HOME_ICON.idleMs;
+
+function idleLook(ms){
+  const h = HOME_ICON;
+  return h.looks[Math.floor(Math.max(ms, 0) / h.lookHoldMs) % h.looks.length];
+}
 
 function arrowDeg(ms){
   const h = HOME_ICON;
@@ -786,15 +786,14 @@ const homeGaze = makeGazeTrack(HOME_ICON.totalMs, ms => {
   const appear = easeInOut(clamp01((ms - h.lookDelayMs) / h.lookInMs));
   const a = arrowDeg(ms) * deg2rad;
   const fx = h.reach * appear * Math.sin(a), fy = -h.reach * appear * Math.cos(a);
-  // 2. once it stops, drift into looking around
+  // 2. once it stops, move on to the looks above
   const calm = easeInOut(clamp01((ms - swoopEnd) / h.settleMs));
   const idle = idleLook(ms - swoopEnd);
-  const w = wobble(ms, 0.1 * appear);
   return {
-    x: fx + (idle.x * h.reach - fx) * calm + w.x,
-    y: fy + (idle.y * h.reach - fy) * calm + w.y
+    x: fx + (idle.x * h.reach - fx) * calm,
+    y: fy + (idle.y * h.reach - fy) * calm
   };
-}, { stiffness: 260, damping: 22, steps: Math.round(HOME_ICON.totalMs / 6) });
+}, { stiffness: 220, damping: 27, steps: Math.round(HOME_ICON.totalMs / 6) });   // damped: settles without shaking
 
 function homeIconMotion(id, t){
   const h = HOME_ICON;
@@ -807,7 +806,7 @@ function homeIconMotion(id, t){
     return { dx: g.x, dy: g.y };
   }
   if(id === "glint"){                                 // the highlight slides against the eye's movement
-    const s = glintShift(homeGaze(ms));
+    const s = glintShift(homeGaze(ms), homeGaze.slow(ms));
     return { dx: s.x, dy: s.y };
   }
   if(id === "shell"){
@@ -834,9 +833,19 @@ function homeIconMotion(id, t){
   return null;
 }
 
+// Where each part goes when the pointer leaves. It keeps its current rotation, so the arrow
+// shrinks away in place and the gap in the ring closes in place (no spinning back, no flying off).
+function homeRestMotion(id, now){
+  if(id === "arrow")     return { opacity: 0, scale: 0.001, rotate: now.rotate, origin: now.origin };
+  if(id === "shell_gap") return { opacity: 0, dash: [RING_LEN - 0.01, 0.01], rotate: now.rotate, origin: now.origin };
+  if(id === "shell")     return { opacity: 1 };
+  if(id === "gaze" || id === "glint") return { dx: 0, dy: 0 };
+  return null;
+}
+
 /* --- Intro icon: a dot shrinks into the eye, which looks right, left, then down as the page slides away --- */
 const INTRO_ICON = {
-  speed: 1,              // 1 = as designed, 1.3 = faster overall
+  speed: 1,              // 1 = as designed, 1.3 = 30% faster overall
   shrinkStartMs: 600,    // the dot starts shrinking (the fade-in takes about 600)
   shrinkMs: 380,         // snappy
   glintStartMs: 880,     // highlight pops in
@@ -847,9 +856,13 @@ const INTRO_ICON = {
     { at: 1850, x: -1, y: 0.1 },   // left
     { at: 2450, x:  0, y: 1   }    // down
   ],
-  leaveAtMs: 2550,       // the page starts sliding away as the eye looks down
-  totalMs: 3200
+  leaveDelayMs: 100,     // the page starts sliding away this long after the last look begins
+  tailMs: 800,           // the animation keeps running this long after the last look begins
+  leaveAtMs: 0,          // (computed)
+  totalMs: 0             // (computed)
 };
+INTRO_ICON.leaveAtMs = INTRO_ICON.looks[INTRO_ICON.looks.length - 1].at + INTRO_ICON.leaveDelayMs;
+INTRO_ICON.totalMs = INTRO_ICON.looks[INTRO_ICON.looks.length - 1].at + INTRO_ICON.tailMs;
 const CORE_START = (EYE_R.shellInner + 0.4) / EYE_R.core;   // the starting dot slightly overlaps the shell: no hairline seam
 
 const introGaze = makeGazeTrack(INTRO_ICON.totalMs, ms => {
@@ -873,7 +886,7 @@ function introIconMotion(id, t){
     return { dx: g.x, dy: g.y };
   }
   if(id === "glint"){                                 // pops in, then slides against the eye's movement
-    const s = glintShift(introGaze(ms));
+    const s = glintShift(introGaze(ms), introGaze.slow(ms));
     return { dx: s.x, dy: s.y, scale: Math.max(easeOutBack(clamp01((ms - e.glintStartMs) / e.glintMs)), 0.001) };
   }
   return null;
@@ -945,6 +958,7 @@ const ICON_ANIMATIONS = {
   },
   home: {
     motion: homeIconMotion,
+    restMotion: homeRestMotion,              // how it returns when the pointer leaves
     hold: true,                              // arrow stays in the ring while hovered
     durationMs: HOME_ICON.totalMs,           // long on purpose: it keeps looking around while hovered
     commitMs: HOME_ICON.commitMs,            // after a click, the swoop plays out and then it eases back
@@ -1020,6 +1034,7 @@ function setupIconHover(svg, button, anim){
   let hovering = false;     // pointer or keyboard focus is on the button
   let committed = false;    // button was clicked: the main part of the animation plays out even if the pointer leaves
   let clicked = false;      // button was clicked since the hover began
+  let phase = "idle";       // "play" while the animation runs or holds, "rest" while easing back
   let playStart = 0;
   let commitTimer = null;
 
@@ -1053,10 +1068,17 @@ function setupIconHover(svg, button, anim){
   function play(){
     const centers = parts.map(centerOf);
     const rests = parts.map((el, i) => restProps(el, centers[i]));
-    const froms = parts.map((el, i) => rests[i] ? liveProps(el, rests[i]) : null);
+    const froms = parts.map((el, i) => {
+      if(!rests[i]) return null;
+      // Rotating parts start from their rest state: mixing a live matrix with a rotation around
+      // the eye's center would swing them off their path for a frame.
+      const m = anim.motion && anim.motion(el.id, 0.5);
+      return (m && m.rotate !== undefined) ? rests[i] : liveProps(el, rests[i]);
+    });
     stopRunning();
     committed = false;
     clicked = false;
+    phase = "play";
     playStart = performance.now();
     const fill = anim.hold ? "forwards" : "none";
 
@@ -1097,13 +1119,29 @@ function setupIconHover(svg, button, anim){
 
   function rest(ms = anim.returnMs){
     const centers = parts.map(centerOf);
-    const rests = parts.map((el, i) => restProps(el, centers[i]));
-    const froms = parts.map((el, i) => rests[i] ? liveProps(el, rests[i]) : null);
+    const returns = [];   // { el, from, to }
+
+    if(anim.motion && anim.restMotion && phase === "play" && running.length){
+      // Return from exactly where the motion is right now, keeping each part's rotation.
+      const cur = running[0].currentTime;
+      const tNow = clamp01((cur == null ? 0 : cur) / anim.durationMs);
+      parts.forEach((el, i) => {
+        const now = anim.motion(el.id, tNow);
+        const target = now && anim.restMotion(el.id, now);
+        if(target) returns.push({ el, from: motionProps(now, centers[i]), to: motionProps(target, centers[i]) });
+      });
+    }else{
+      const rests = parts.map((el, i) => restProps(el, centers[i]));
+      parts.forEach((el, i) => {
+        if(rests[i]) returns.push({ el, from: liveProps(el, rests[i]), to: rests[i] });
+      });
+    }
+
     stopRunning();
-    parts.forEach((el, i) => {
-      if(!rests[i]) return;
-      running.push(el.animate([froms[i], rests[i]], { duration: ms, easing: anim.ease }));
+    returns.forEach(({ el, from, to }) => {
+      running.push(el.animate([from, to], { duration: ms, easing: anim.ease }));
     });
+    phase = "rest";
   }
 
   function enter(){ hovering = true; play(); }

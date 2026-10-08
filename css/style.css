@@ -89,7 +89,7 @@ header{
 #logo-btn{
   --logo-size:48px;
   --logo-border:5px;
-  --logo-r:50%x;
+  --logo-r:50%;
   --logo-icon:30px;
   --eye-bg:#fff;                    /* what shows through the catchlight */
   box-sizing:border-box;
