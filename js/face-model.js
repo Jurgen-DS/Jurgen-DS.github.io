@@ -1,76 +1,95 @@
-/* Prototype only: a cube "head" with two sphere "eyes" that turns
-   to face the cursor anywhere on the page. Swap headMesh/eye geometry
-   for an imported model later (e.g. a GLTF export from Blender via
-   THREE.GLTFLoader) without touching the tracking logic below. */
 (function(){
   const container = document.getElementById("face-canvas");
   if(!container || typeof THREE === "undefined") return;
 
+  /* ---------- CONFIG ---------- */
+  const CONFIG = {
+    camera: {
+      fov: 35,                  // field of view in degrees (lower = flatter, more zoomed in)
+      distance: 4               // how far the camera sits from the head
+    },
+    pixelRatioMax: 2,           // cap on render sharpness for high-density screens (lower = lighter)
+    light: {
+      ambient: 0.7,             // overall soft light
+      directional: 0.6,         // strength of the main light
+      position: [2, 3, 4]       // where the main light sits: x (right), y (up), z (toward the viewer)
+    },
+    head: {
+      size: 1.4,                // width, height and depth of the cube head
+      color: 0xe8e8e8,          // head colour
+      roughness: 0.85           // 0 = glossy, 1 = matte
+    },
+    eye: {
+      radius: 0.14,             // size of each eye
+      segments: 20,             // how round the eyes are (higher = smoother, heavier)
+      color: 0x111111,          // eye colour
+      roughness: 0.4,           // 0 = glossy, 1 = matte
+      offsetX: 0.32,            // how far each eye sits from the middle, left and right
+      offsetY: 0.15,            // eye height on the face (positive = up)
+      offsetZ: 0.72             // how far the eyes sit out from the head center (just past the face)
+    },
+    tracking: {
+      lerpRate: 0.08,           // how fast the head turns toward the cursor (0 to 1, higher = snappier)
+      gain: 1.2,                // how strongly the cursor distance turns the head
+      maxYaw: 0.5,              // furthest left/right turn, in radians
+      maxPitch: 0.35            // furthest up/down tilt, in radians
+    },
+    fallbackPose: {
+      yaw: 0.45,                // left/right turn used if the About button can't be found
+      pitch: -0.3               // up/down tilt used in that case
+    },
+    aboutPageIndex: 1           // position of the About page (0 Work, 1 About, 2 Contact)
+  };
+
+  /* ---------- SCENE ---------- */
   const aboutPage = document.getElementById("page-about");
+  const aboutNavButton = document.querySelector(`.nav-link[data-page="${CONFIG.aboutPageIndex}"]`);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-  camera.position.z = 4;
+  const camera = new THREE.PerspectiveCamera(CONFIG.camera.fov, 1, 0.1, 100);
+  camera.position.z = CONFIG.camera.distance;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.pixelRatioMax));
   container.appendChild(renderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-  dirLight.position.set(2, 3, 4);
-  scene.add(dirLight);
+  scene.add(new THREE.AmbientLight(0xffffff, CONFIG.light.ambient));
+  const keyLight = new THREE.DirectionalLight(0xffffff, CONFIG.light.directional);
+  keyLight.position.set(...CONFIG.light.position);
+  scene.add(keyLight);
 
   const head = new THREE.Group();
   scene.add(head);
 
-  const headMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.4, 1.4, 1.4),
-    new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.85 })
-  );
-  head.add(headMesh);
+  const { size, color, roughness } = CONFIG.head;
+  head.add(new THREE.Mesh(
+    new THREE.BoxGeometry(size, size, size),
+    new THREE.MeshStandardMaterial({ color, roughness })
+  ));
 
-  const eyeGeo = new THREE.SphereGeometry(0.14, 20, 20);
-  const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 });
+  const eyeConfig = CONFIG.eye;
+  const eyeGeometry = new THREE.SphereGeometry(eyeConfig.radius, eyeConfig.segments, eyeConfig.segments);
+  const eyeMaterial = new THREE.MeshStandardMaterial({ color: eyeConfig.color, roughness: eyeConfig.roughness });
+  [-1, 1].forEach(side => {
+    const eye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    eye.position.set(side * eyeConfig.offsetX, eyeConfig.offsetY, eyeConfig.offsetZ);
+    head.add(eye);
+  });
 
-  const eyeLeft = new THREE.Mesh(eyeGeo, eyeMat);
-  eyeLeft.position.set(-0.32, 0.15, 0.72);
-  head.add(eyeLeft);
+  /* ---------- TRACKING ---------- */
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-  const eyeRight = new THREE.Mesh(eyeGeo, eyeMat);
-  eyeRight.position.set(0.32, 0.15, 0.72);
-  head.add(eyeRight);
-
-  const LERP_RATE = 0.08;
-  const MAX_YAW = 0.5;
-  const MAX_PITCH = 0.35;
-
-  // Fallback used only if the About button can't be found.
-  const FALLBACK = { yaw: 0.45, pitch: -0.3 };
-
-  let targetYaw = FALLBACK.yaw;
-  let targetPitch = FALLBACK.pitch;
-  let isAboutActive = false;
-
-  // The last click position on the page. A capture listener on document
-  // always runs before the nav button handlers in main.js, so this is
-  // already up to date when "pagechange" fires.
+  let targetYaw = CONFIG.fallbackPose.yaw;
+  let targetPitch = CONFIG.fallbackPose.pitch;
+  let aboutActive = false;
   let lastClick = null;
-  document.addEventListener("click", (e) => {
-    let x = e.clientX;
-    let y = e.clientY;
-    // Keyboard activation reports 0,0, so use the center of the element.
-    if(!x && !y && e.target && e.target.getBoundingClientRect){
-      const r = e.target.getBoundingClientRect();
-      x = r.left + r.width / 2;
-      y = r.top + r.height / 2;
-    }
-    lastClick = { x, y };
-  }, true);
 
-  // Center of the canvas as it will be once About is at rest on screen.
-  // While About is slid off-screen, the canvas rect is shifted by the
-  // page offset, so subtract the page's own left offset to undo that.
+  function setPose(yaw, pitch, snap){
+    targetYaw = yaw;
+    targetPitch = pitch;
+    if(snap) head.rotation.set(pitch, yaw, 0);
+  }
+
   function restCenter(){
     const rect = container.getBoundingClientRect();
     const pageLeft = aboutPage ? aboutPage.getBoundingClientRect().left : 0;
@@ -80,73 +99,64 @@
     };
   }
 
-  // Turn a screen point into a head orientation and set it as the target.
   function aimAt(x, y, snap){
-    const c = restCenter();
-    const dx = (x - c.x) / window.innerWidth;
-    const dy = (y - c.y) / window.innerHeight;
-    targetYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, dx * 1.2));
-    targetPitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, dy * 1.2));
-    if(snap){
-      head.rotation.set(targetPitch, targetYaw, 0);
-    }
+    const { gain, maxYaw, maxPitch } = CONFIG.tracking;
+    const center = restCenter();
+    const yaw = clamp(((x - center.x) / window.innerWidth) * gain, -maxYaw, maxYaw);
+    const pitch = clamp(((y - center.y) / window.innerHeight) * gain, -maxPitch, maxPitch);
+    setPose(yaw, pitch, snap);
   }
 
-  function aboutButtonCenter(){
-    const btn = document.querySelector('.nav-link[data-page="1"]');
-    if(!btn) return null;
-    const r = btn.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  function aboutNavButtonCenter(){
+    if(!aboutNavButton) return null;
+    const rect = aboutNavButton.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   }
+
+  document.addEventListener("click", (e) => {
+    let { clientX: x, clientY: y } = e;
+    if(!x && !y && e.target && e.target.getBoundingClientRect){
+      const rect = e.target.getBoundingClientRect();
+      x = rect.left + rect.width / 2;
+      y = rect.top + rect.height / 2;
+    }
+    lastClick = { x, y };
+  }, true);
 
   document.addEventListener("pagechange", (e) => {
-    const { index } = e.detail;
-    const nowActive = index === 1;
+    const nowActive = e.detail.index === CONFIG.aboutPageIndex;
 
-    if(nowActive && !isAboutActive){
-      // Arriving: look at the About button right away (no easing), so
-      // it feels like the head was already following your cursor.
-      const p = aboutButtonCenter();
-      if(p){
-        aimAt(p.x, p.y, true);
-      } else {
-        targetYaw = FALLBACK.yaw;
-        targetPitch = FALLBACK.pitch;
-        head.rotation.set(FALLBACK.pitch, FALLBACK.yaw, 0);
-      }
+    if(nowActive && !aboutActive){
+      const point = aboutNavButtonCenter();
+      if(point) aimAt(point.x, point.y, true);
+      else setPose(CONFIG.fallbackPose.yaw, CONFIG.fallbackPose.pitch, true);
+    } else if(!nowActive && aboutActive && lastClick){
+      aimAt(lastClick.x, lastClick.y, false);
     }
 
-    if(!nowActive && isAboutActive){
-      // Leaving: look at wherever you just clicked (logo, Work or
-      // Contact) and hold that during the slide away.
-      if(lastClick) aimAt(lastClick.x, lastClick.y, false);
-    }
-
-    isAboutActive = nowActive;
+    aboutActive = nowActive;
   });
 
+  document.addEventListener("mousemove", (e) => {
+    if(aboutActive) aimAt(e.clientX, e.clientY, false);
+  });
+
+  /* ---------- RENDER LOOP ---------- */
   function resize(){
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    if(w === 0 || h === 0) return;
-    camera.aspect = w / h;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    if(width === 0 || height === 0) return;
+    camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
+    renderer.setSize(width, height);
   }
   resize();
   window.addEventListener("resize", resize);
 
-  // Only track the cursor while About is the active page. While it is
-  // sliding away or off-screen, the head holds its last target.
-  document.addEventListener("mousemove", (e) => {
-    if(!isAboutActive) return;
-    aimAt(e.clientX, e.clientY, false);
-  });
-
   function animate(){
     requestAnimationFrame(animate);
-    head.rotation.y += (targetYaw - head.rotation.y) * LERP_RATE;
-    head.rotation.x += (targetPitch - head.rotation.x) * LERP_RATE;
+    head.rotation.y += (targetYaw - head.rotation.y) * CONFIG.tracking.lerpRate;
+    head.rotation.x += (targetPitch - head.rotation.x) * CONFIG.tracking.lerpRate;
     renderer.render(scene, camera);
   }
   animate();

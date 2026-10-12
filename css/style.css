@@ -1,20 +1,85 @@
+/* ---------- TOKENS ---------- */
 :root{
-  --bg:#ffffff;
-  --ink:#111111;
-  --mid:#6b6b6b;
-  --line-dark:#dcdcdc;
-  --pending:#ffffff;
-  --reveal-duration: 1.6s;
+  /* colours */
+  --bg:#ffffff;                 /* page background */
+  --ink:#111111;                /* main text, selected nav pill, buttons */
+  --mid:#6b6b6b;                /* secondary text */
+  --line:#dcdcdc;               /* thin divider lines */
+  --chrome:#ececec;             /* grey frame of the nav and home button, and their hover fill */
+  --surface:#ffffff;            /* white face of the nav buttons and home button */
+  --intro-bg:#111111;           /* intro screen background */
+  --pending:#ffffff;            /* colour revealing text fades in from */
 
-  --work-top-x: 14px;
-  --work-top-y: 14px;
-  --work-bottom-x: 14px;
-  --work-bottom-y: 14px;
+  /* motion */
+  --reveal-duration:1.6s;       /* length of the blur-to-sharp text fade (read by main.js) */
+  --ease-slide:cubic-bezier(.65,0,.35,1);   /* easing for page slides, intro, overlay and project hover */
 
-  --dump-top-space: 35px;
-  --dump-side-space: 32px;
-  --dump-bottom-space: 100px;
+  /* distance of the home button and nav from the screen edges */
+  --edge-x:14px;                /* from the left and right edge */
+  --edge-y:14px;                /* from the top edge */
+
+  /* nav bar */
+  --nav-h:38px;                 /* button height */
+  --nav-pad:5px;                /* space around and between the buttons */
+  --nav-x:17px;                 /* left and right padding inside a button */
+  --nav-gap:10px;               /* space between icon and label */
+  --nav-font:15.5px;            /* label size */
+  --nav-icon:16px;              /* icon size (Work) */
+  --nav-icon-alt:18px;          /* icon size for About and Contact (they look smaller) */
+  --nav-r:7px;                  /* button corner radius, the frame and home button add their border to it */
+  --nav-time:.55s;              /* duration of the dark selected pill sliding */
+  --nav-ease:cubic-bezier(.3,1.25,.4,1);   /* easing of that slide (slight spring) */
+  --nav-hover-bg:var(--chrome); /* grey hover fill */
+  --nav-hover-time:.4s;         /* duration of the grey hover pill following the cursor */
+  --nav-hover-ease:cubic-bezier(.22,1,.36,1);   /* easing of that follow (no overshoot) */
+
+  /* home button (square, follows the nav by default) */
+  --logo-border:var(--nav-pad); /* thickness of the grey frame */
+  --logo-size:calc(var(--nav-h) + 2 * var(--nav-pad));   /* outer size, equal to the nav height */
+  --logo-icon:30px;             /* size of the eye icon inside */
+
+  /* other sizes */
+  --intro-icon:240px;           /* size of the eye on the intro screen */
+  --face-size:220px;            /* max size of the 3D head on the About page */
+
+  /* work page spacing: gap and outer padding of each row of projects */
+  --work-top-x:14px;            /* top row, sides and gap between projects */
+  --work-top-y:14px;            /* top row, above and below */
+  --work-bottom-x:14px;         /* bottom row, sides and gap between projects */
+  --work-bottom-y:14px;         /* bottom row, above and below */
+
+  /* image dump ("Things I make when nobody asked") */
+  --dump-top-space:35px;        /* space above the heading */
+  --dump-side-space:32px;       /* space left and right */
+  --dump-bottom-space:100px;    /* space below the grid */
+  --dump-gap:14px;              /* gap between images */
+  --dump-row:140px;             /* height of one grid row */
 }
+
+/* tablets and small laptops */
+@media (max-width:860px){
+  :root{
+    --dump-row:120px;           /* dump grid rows get shorter */
+  }
+}
+
+/* phones: smaller nav, tighter edges (the home button follows the nav size) */
+@media (max-width:720px){
+  :root{
+    --edge-x:20px;
+    --edge-y:9px;
+    --nav-h:34px;
+    --nav-pad:4px;
+    --nav-x:12px;
+    --nav-gap:8px;
+    --nav-font:13px;
+    --nav-r:6px;
+    --logo-icon:27px;
+    --face-size:140px;
+  }
+}
+
+/* ---------- BASE ---------- */
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; height:100%; }
 body{
@@ -25,42 +90,41 @@ body{
   overflow-x:hidden;
 }
 
-.reveal-word.pending{
-  color: var(--pending);
-  filter: blur(3px);
-}
+/* ---------- TEXT REVEAL ---------- */
 .reveal-word{
-  transition: color var(--reveal-duration) ease, filter var(--reveal-duration) ease;
+  transition:color var(--reveal-duration) ease, filter var(--reveal-duration) ease;
 }
-
-/* Failsafe: if the reveal script breaks, always show the text */
+.reveal-word.pending{
+  color:var(--pending);
+  filter:blur(3px);
+}
 html.reveal-failed .reveal-word.pending{
-  color: inherit !important;
-  filter: none !important;
+  color:inherit !important;
+  filter:none !important;
 }
 
 /* ---------- INTRO ---------- */
 #intro{
   position:fixed;
   inset:0;
-  background:#111;
+  background:var(--intro-bg);
   color:#fff;
   z-index:100;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  transition:transform .9s cubic-bezier(.65,0,.35,1);
+  transition:transform var(--intro-slide-ms, 900ms) var(--ease-slide);
 }
 #intro.leaving{ transform:translateY(-100%); }
-#intro .reveal-word.pending{ color:#111111; }
+#intro .reveal-word.pending{ color:var(--intro-bg); }
 
 .mark{ opacity:0; transform:scale(.85); transition:opacity .6s ease, transform .6s ease; }
 .mark.visible{ opacity:1; transform:scale(1); }
 .mark svg{ width:100%; height:auto; display:block; }
 
-#intro-mark{ --eye-bg:#111; width:240px; margin-bottom:32px; }
-#intro-mark img{ width:100%; height:auto; display:block; filter:invert(1); }   /* white eye until the SVG is inlined */
+#intro-mark{ --eye-bg:var(--intro-bg); width:var(--intro-icon); margin-bottom:32px; }
+#intro-mark img{ width:100%; height:auto; display:block; filter:invert(1); }
 #intro-mark svg *{ transform-box:view-box; transform-origin:0 0; }
 
 #intro h1{ font-size:clamp(28px,5vw,52px); font-weight:700; margin:0; letter-spacing:0.01em; }
@@ -72,69 +136,45 @@ html.reveal-failed .reveal-word.pending{
 }
 #skip-intro:hover{ color:#fff; }
 
-/* ---------- NAV ---------- */
+/* ---------- HOME BUTTON ---------- */
 header{
   position:fixed;
-  top:0; left:0; right:0;
+  top:var(--edge-y);
+  left:var(--edge-x);
   z-index:50;
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  padding:14px;
-  mix-blend-mode:normal;   /* must not be "difference" anymore, or the button turns dark */
-  pointer-events:none;
 }
 
-/* home button: white with a gray border, like the nav */
 #logo-btn{
-  --logo-size:48px;
-  --logo-border:5px;
-  --logo-r:50%;
-  --logo-icon:30px;
-  --eye-bg:#fff;                    /* what shows through the catchlight */
-  box-sizing:border-box;
+  --eye-bg:var(--surface);
   display:grid;
   place-items:center;
   width:var(--logo-size);
   height:var(--logo-size);
   padding:0;
-  border:var(--logo-border) solid #ececec;
-  border-radius:var(--logo-r);
-  background:#fff;
+  border:var(--logo-border) solid var(--chrome);
+  border-radius:calc(var(--nav-r) + var(--logo-border));
+  background:var(--surface);
   color:var(--ink);
   cursor:pointer;
-  pointer-events:auto;
   transition:background .15s ease;
 }
-#logo-btn:hover{ background:#ececec; --eye-bg:#ececec; }
+#logo-btn:hover{ background:var(--chrome); --eye-bg:var(--chrome); }
 .logo-icon{ width:var(--logo-icon); height:var(--logo-icon); display:block; overflow:visible; }
 .logo-icon #glint{ transition:fill .15s ease; }
 
+/* ---------- NAV ---------- */
 #site-nav{
-  --nav-h:38px;         /* button height (was 32) */
-  --nav-pad:5px;        /* space around and between the buttons (was 4) */
-  --nav-x:17px;         /* horizontal padding inside a button (was 14) */
-  --nav-gap:10px;       /* space between icon and label (was 8) */
-  --nav-font:15.5px;    /* label size (was 13) */
-  --nav-icon:16px;      /* keep at 16 so the icons stay crisp */
-  --nav-icon-alt:18px;  /* about and contact icons slightly larger as work icon seem too large */
-  --nav-r:7px;          /* button corner radius; the box adds the padding to it */
-  --nav-time:.55s;
-  --nav-ease:cubic-bezier(.3,1.25,.4,1);   /* slight spring; use .65,0,.35,1 for no overshoot */
-  --nav-hover-bg:#ececec;
-  --nav-hover-time:.4s;
-  --nav-hover-ease:cubic-bezier(.22,1,.36,1);   /* fast start, soft landing, no overshoot */
   position:fixed;
-  top:14px; right:14px;
+  top:var(--edge-y);
+  right:var(--edge-x);
   z-index:51;
   padding:var(--nav-pad);
-  background:#ececec;
+  background:var(--chrome);
   border-radius:calc(var(--nav-r) + var(--nav-pad));
   isolation:isolate;
 }
 #site-nav ul{ display:flex; gap:var(--nav-pad); list-style:none; margin:0; padding:0; }
 
-/* gray hover pill: follows the cursor, positioned by JS */
 #nav-hover{
   position:absolute;
   top:var(--nav-pad); left:0;
@@ -150,7 +190,6 @@ header{
     opacity .2s ease;
 }
 
-/* dark selected pill: sits above the hover pill */
 #nav-pill{
   position:absolute;
   top:var(--nav-pad); left:0;
@@ -178,31 +217,31 @@ header{
   cursor:pointer;
   transition:color .3s ease;
 }
-/* the white button shape, under both pills */
 .nav-link::before{
   content:"";
   position:absolute; inset:0;
-  background:#fff;
+  background:var(--surface);
   border-radius:var(--nav-r);
   z-index:0;
   transition:background .15s ease;
 }
-
 #site-nav li.is-hover > .nav-link:not(.active)::before{ background:var(--nav-hover-bg); }
 
-.nav-link > *{ position:relative; z-index:3; }   /* label and icon above everything */
-.nav-link.active{ color:#fff; }
+.nav-link > *{ position:relative; z-index:3; }
+.nav-link.active{ color:var(--surface); }
 .nav-label{
   font-weight:700;
-  -webkit-text-stroke:.015em currentColor;   /* thickens the letters on every system */
+  -webkit-text-stroke:.015em currentColor;
 }
 
-/* icons */
 .nav-link .nav-icon{ width:var(--nav-icon); height:var(--nav-icon); flex:none; display:block; }
-.nav-link span.nav-icon{ background:currentColor; opacity:.3; transition:opacity .3s ease; }   /* placeholder */
-.nav-link.active span.nav-icon{ opacity:1; }
+.nav-link .nav-icon[data-icon="about"],
+.nav-link .nav-icon[data-icon="contact"]{
+  width:var(--nav-icon-alt);
+  height:var(--nav-icon-alt);
+}
 img.nav-icon[data-icon]{ transition:filter .3s ease; }
-.nav-link.active img.nav-icon[data-icon]{ filter:invert(1); }   /* only until the SVG is inlined */
+.nav-link.active img.nav-icon[data-icon]{ filter:invert(1); }
 svg.nav-icon[data-icon]{ fill:currentColor; }
 svg.nav-icon[data-icon] *{
   fill:inherit;
@@ -210,19 +249,13 @@ svg.nav-icon[data-icon] *{
   transform-origin:0 0;
 }
 svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
-/* bigger About and Contact icons (their shapes look smaller than the Work bars) */
-.nav-link .nav-icon[data-icon="about"],
-.nav-link .nav-icon[data-icon="contact"]{
-  width:var(--nav-icon-alt);
-  height:var(--nav-icon-alt);
-}
 
 /* ---------- SLIDING PAGES ---------- */
 #pages{
   display:flex;
   height:100dvh;
-  transform: translateX(calc(var(--i, 0) * -100vw));
-  transition: transform .6s cubic-bezier(.65,0,.35,1);
+  transform:translateX(calc(var(--i, 0) * -100vw));
+  transition:transform .6s var(--ease-slide);
 }
 .page{
   min-width:100vw;
@@ -238,15 +271,14 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   display:flex;
   width:100%;
   height:100dvh;
-  box-sizing:border-box;
 }
 .work-row-top{
-  padding: var(--work-top-y) var(--work-top-x);
-  gap: var(--work-top-x);
+  padding:var(--work-top-y) var(--work-top-x);
+  gap:var(--work-top-x);
 }
 .work-row-bottom{
-  padding: var(--work-bottom-y) var(--work-bottom-x);
-  gap: var(--work-bottom-x);
+  padding:var(--work-bottom-y) var(--work-bottom-x);
+  gap:var(--work-bottom-x);
 }
 
 .project{
@@ -255,7 +287,7 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   height:100%;
   overflow:hidden;
   cursor:pointer;
-  transition:flex-grow .5s cubic-bezier(.65,0,.35,1);
+  transition:flex-grow .5s var(--ease-slide);
   background:#f2f2f2;
 }
 .project:hover{ flex-grow:1.8; }
@@ -284,23 +316,26 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 
 .project-caption{ position:absolute; left:20px; bottom:20px; color:#fff; z-index:2; }
 .project-caption h2{ font-size:clamp(15px,1.5vw,21px); margin:0 0 4px; font-weight:700; }
-.project-caption span:not(.reveal-word){ font-size:12px; color:#d8d8d8; display:block; max-width:24ch; }
+.project-caption > span{ font-size:12px; color:#d8d8d8; display:block; max-width:24ch; }
 .project-caption .reveal-word.pending{ color:rgba(255,255,255,0.06); }
-
-.project-index{ position:absolute; right:20px; bottom:58px; color:#fff; font-size:0px; z-index:2; } /* remove this and anything related to it, not using it */
 
 @media (max-width:860px){
   .work-row{ flex-direction:column; height:auto; }
   .project{ height:100dvh; flex:none; }
 }
 
-/* ---------- CREATIVE SPACE / IMAGE DUMP ---------- */
+/* ---------- IMAGE DUMP ---------- */
 #dump{
-  padding: var(--dump-top-space) var(--dump-side-space) var(--dump-bottom-space);
-  border-top:1px solid var(--line-dark);
+  padding:var(--dump-top-space) var(--dump-side-space) var(--dump-bottom-space);
+  border-top:1px solid var(--line);
 }
 #dump-heading{ font-size:clamp(24px,3vw,38px); font-weight:700; max-width:16ch; margin:0 0 48px; }
-.dump-grid{ display:grid; grid-template-columns:repeat(6,1fr); grid-auto-rows:140px; gap:14px; }
+.dump-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  grid-auto-rows:var(--dump-row);
+  gap:var(--dump-gap);
+}
 .dump-grid img{ width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; }
 .dump-grid > div:nth-child(1){ grid-column:span 2; grid-row:span 2; }
 .dump-grid > div:nth-child(3){ grid-column:span 1; grid-row:span 2; }
@@ -309,17 +344,17 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 .dump-grid > div:nth-child(8){ grid-column:span 2; grid-row:span 1; }
 
 @media (max-width:860px){
-  .dump-grid{ grid-template-columns:repeat(2,1fr); grid-auto-rows:120px; }
+  .dump-grid{ grid-template-columns:repeat(2,1fr); }
   .dump-grid > div{ grid-column:span 1 !important; grid-row:span 1 !important; }
 }
 
-/* ---------- SITE FOOTER (all pages) ---------- */
+/* ---------- FOOTER ---------- */
 .site-footer{
   text-align:center;
   padding:24px 20px;
   font-size:11px;
   color:var(--mid);
-  border-top:1px solid var(--line-dark);
+  border-top:1px solid var(--line);
   margin-top:auto;
 }
 
@@ -345,15 +380,25 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 .about-divider{
   flex:none;
   width:1px;
-  background:var(--line-dark);
+  background:var(--line);
 }
 
-.faq{ margin-top:36px; border-top:1px solid var(--line-dark); }
-.faq-item{ border-bottom:1px solid var(--line-dark); }
+.faq{ margin-top:36px; border-top:1px solid var(--line); }
+.faq-item{ border-bottom:1px solid var(--line); }
 .faq-q{
-  width:100%; display:flex; justify-content:space-between; align-items:center;
-  background:none; border:none; font-family:inherit; font-size:15px; font-weight:700;
-  padding:18px 0; cursor:pointer; color:var(--ink); text-align:left;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:none;
+  border:none;
+  font-family:inherit;
+  font-size:15px;
+  font-weight:700;
+  padding:18px 0;
+  cursor:pointer;
+  color:var(--ink);
+  text-align:left;
 }
 .faq-q-text{
   flex:1 1 auto;
@@ -383,16 +428,13 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   padding-left:48px;
   align-self:center;
 }
-.about-photo img{ width:100%; max-width:220px; aspect-ratio:1; object-fit:cover; display:block; }
-#face-canvas{ width:100%; max-width:220px; aspect-ratio:1; }
+#face-canvas{ width:100%; max-width:var(--face-size); aspect-ratio:1; }
 #face-canvas canvas{ display:block; width:100%; height:100%; }
 
 @media (max-width:720px){
   .about-inner{ flex-direction:column; padding:120px 20px 60px; }
   .about-text{ padding-right:0; }
   .about-divider{ display:none; }
-  .about-photo img,
-  #face-canvas{ max-width:140px; }
 }
 
 /* ---------- CONTACT ---------- */
@@ -418,12 +460,10 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   word-break:break-all;
 }
 @keyframes email-pulse{
-  0%, 100% { transform:scale(1); }
-  50% { transform:scale(1.06); }
+  0%, 100%{ transform:scale(1); }
+  50%{ transform:scale(1.06); }
 }
-.contact-email.pulse{
-  animation: email-pulse .6s ease-in-out 2;
-}
+.contact-email.pulse{ animation:email-pulse .6s ease-in-out 2; }
 .contact-meta{ margin-top:20px; display:flex; gap:24px; font-size:13px; color:var(--mid); }
 .contact-meta a{ color:var(--mid); }
 
@@ -432,7 +472,7 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   width:1px;
   align-self:stretch;
   margin:24px 0;
-  background:var(--line-dark);
+  background:var(--line);
 }
 
 .contact-form{
@@ -449,7 +489,7 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   font-size:14px;
   padding:10px 0;
   border:none;
-  border-bottom:1px solid var(--line-dark);
+  border-bottom:1px solid var(--line);
   background:transparent;
   color:var(--ink);
   width:100%;
@@ -482,15 +522,21 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 
 /* ---------- PROJECT OVERLAY ---------- */
 #overlay{
-  position:fixed; inset:0; background:#fff; z-index:80;
-  overflow-y:auto; transform:translateY(100%);
-  transition:transform .5s cubic-bezier(.65,0,.35,1);
+  position:fixed; inset:0;
+  background:var(--bg);
+  z-index:80;
+  overflow-y:auto;
+  transform:translateY(100%);
+  transition:transform .5s var(--ease-slide);
 }
 #overlay.open{ transform:translateY(0); }
 .overlay-header{
-  position:sticky; top:0; background:#fff;
+  position:sticky; top:0;
+  background:var(--bg);
   display:flex; justify-content:space-between; align-items:center;
-  padding:24px 32px; border-bottom:1px solid var(--line-dark); z-index:2;
+  padding:24px 32px;
+  border-bottom:1px solid var(--line);
+  z-index:2;
 }
 .overlay-header h2{ font-size:16px; margin:0; }
 #close-overlay{ background:none; border:none; font-size:14px; cursor:pointer; font-family:inherit; }
@@ -527,8 +573,6 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
   padding:24px;
   background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0));
   color:#fff;
-  transform:translateY(0);
-  opacity:1;
   transition:transform .4s ease, opacity .4s ease;
 }
 .lightbox-caption.hidden{ transform:translateY(15%); opacity:0; }
@@ -549,17 +593,3 @@ svg.nav-icon[data-icon="work"] *{ shape-rendering:crispEdges; }
 #lightbox-close{ top:24px; right:32px; font-size:16px; }
 #lightbox-prev{ left:24px; top:50%; transform:translateY(-50%); font-size:36px; }
 #lightbox-next{ right:24px; top:50%; transform:translateY(-50%); font-size:36px; }
-
-@media (max-width:720px){
-  header{ padding:9px 20px; }
-  #logo-btn{ --logo-size:42px; --logo-border:4px; --logo-r:50%; --logo-icon:27px; }
-  #site-nav{
-    top:9px; right:20px;
-    --nav-h:34px;
-    --nav-pad:4px;
-    --nav-x:12px;
-    --nav-gap:8px;
-    --nav-font:13px;
-    --nav-r:6px;
-  }
-}
